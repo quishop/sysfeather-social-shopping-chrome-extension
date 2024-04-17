@@ -1,18 +1,9 @@
 {
-    "name": "awesome-chrome-extension-boilerplate",
+    "name": "sysfeather-social-shopping-chrome-extension",
     "version": "1.0.0",
-    "description": "an awesome boilerplate for chrome extension development!",
+    "description": "sysfeather-social-shopping-chrome-extension",
     "private": true,
-    "author": "YuTengjing",
     "license": "MIT",
-    "homepage": "https://github.com/tjx666/awesome-chrome-extension-boilerplate#readme",
-    "repository": {
-        "type": "git",
-        "url": "git+ssh://git@github.com/tjx666/awesome-chrome-extension-boilerplate.git"
-    },
-    "bugs": {
-        "url": "https://github.com/tjx666/awesome-chrome-extension-boilerplate/issues"
-    },
     "scripts": {
         "start": "cross-env-shell NODE_ENV=development ts-node --files -P ./server/tsconfig.json ./server",
         "devtools": "pnpm start -- --devtools",
