@@ -2,7 +2,7 @@
   <img width="150" src="/public/new-sysfeather.png" alt="Sysfeather icon">
 </p>
 
-<h1 align="center">矽羽直播主控台</h1>
+<h1 align="center">矽羽社群購物Chrome plugin</h1>
 
 # sysfeather-social-shopping-chrome-extension
 
