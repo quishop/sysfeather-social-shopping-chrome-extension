@@ -6,14 +6,14 @@
 
 # sysfeather-social-shopping-chrome-extension
 
-
 ## :sparkles: 特性
 
 `popup` 頁面支持 `react hot reload` & `react devtools`，充分享受現代前端工程化的便捷，讓你從開發 `SPA` 無縫切換到 chrome 擴展開發。
- - :shield: 整個模板包括 `webpack` 配置都是用 `TypeScript` 編寫的，使用 `TypeScript` 配置 `webpack` 減少查閱文檔和手殘的概率。
- - :lipstick: ​ 支持 css/less/sass，使用 `mini-css-extract-plugin` 將 CSS 分離成 content CSS Script。
- - :hammer_and_pick: 集成了社區很多的優秀的 `webpack`，`eslint` 和 `babel` 插件，優化開發，構建和打包分析體驗，還配置了 `husky` , `format-imports`, `stylelint`, `travis` 和 `audit-ci` 構建工具。
- - :rainbow: 默認集成了 `jquery`，`lodash`，`antd` 等常用工具庫，並對它們的打包進行了優化
+
+- :shield: 整個模板包括 `webpack` 配置都是用 `TypeScript` 編寫的，使用 `TypeScript` 配置 `webpack` 減少查閱文檔和手殘的概率。
+- :lipstick: ​ 支持 css/less/sass，使用 `mini-css-extract-plugin` 將 CSS 分離成 content CSS Script。
+- :hammer_and_pick: 集成了社區很多的優秀的 `webpack`，`eslint` 和 `babel` 插件，優化開發，構建和打包分析體驗，還配置了 `husky` , `format-imports`, `stylelint`, `travis` 和 `audit-ci` 構建工具。
+- :rainbow: 默認集成了 `jquery`，`lodash`，`antd` 等常用工具庫，並對它們的打包進行了優化
 
 ## :package: 安装
 
@@ -173,6 +173,3 @@ pnpm build-analyze
 ## :books: Blog
 
 核心原理：[使用 webpack 構建 chrome 擴展的熱更新問題](https://zhuanlan.zhihu.com/p/103072251)
-
-## :handshake: 貢獻 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
-
