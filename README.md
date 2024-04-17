@@ -1,53 +1,51 @@
-# awesome-chrome-extension-boilerplate
+<p align="center">
+  <img width="150" src="/public/new-sysfeather.png" alt="Sysfeather icon">
+</p>
 
-[![Build Status](https://travis-ci.org/tjx666/awesome-chrome-extension-boilerplate.svg?branch=master)](https://travis-ci.org/tjx666/awesome-chrome-extension-boilerplate) [![Known Vulnerabilities](https://snyk.io/test/github/tjx666/awesome-chrome-extension-boilerplate/badge.svg?targetFile=package.json)](https://snyk.io/test/github/tjx666/awesome-chrome-extension-boilerplate?targetFile=package.json) [![Percentage of issues still open](https://isitmaintained.com/badge/open/tjx666/awesome-chrome-extension-boilerplate.svg)](http://isitmaintained.com/project/tjx666/awesome-chrome-extension-boilerplate)
+<h1 align="center">矽羽直播主控台</h1>
 
-> 一个超棒的基于 React & TypeScript & webpack 的 chrome 扩展开发模板
+# sysfeather-social-shopping-chrome-extension
 
-manifest v3 版本 :point_right: [manifest-v3](https://github.com/tjx666/awesome-chrome-extension-boilerplate/tree/manifest-v3)
 
 ## :sparkles: 特性
 
-- :fire: 支持修改 `content scripts` 代码自动重载扩展和刷新注入了 `content scripts`的页面，再也不用修改了 `content scripts` 后手动刷新扩展和页面了。
-- :palm_tree: `options` 和 `popup` 页面支持 `react hot reload` & `react devtools`，充分享受现代前端工程化的便捷，让你从开发 `SPA` 无缝切换到 chrome 扩展开发。
-- :shield: 整个模板包括 `webpack` 配置都是用 `TypeScript` 编写的，使用 `TypeScript` 配置 `webpack` 减少查阅文档和手残的概率。
-- :lipstick: ​ 支持 css/less/sass，使用 `mini-css-extract-plugin` 将 CSS 分离成 content CSS Script。
-- :hammer_and_pick: 集成了社区很多的优秀的 `webpack`，`eslint` 和 `babel` 插件，优化开发，构建和打包分析体验，还配置了 `husky` , `format-imports`, `stylelint`, `travis` 和 `audit-ci` 构建工具。
-- :rainbow: 默认集成了 `jquery`，`lodash`，`antd` 等常用工具库，并对它们的打包进行了优化
+`popup` 頁面支持 `react hot reload` & `react devtools`，充分享受現代前端工程化的便捷，讓你從開發 `SPA` 無縫切換到 chrome 擴展開發。
+ - :shield: 整個模板包括 `webpack` 配置都是用 `TypeScript` 編寫的，使用 `TypeScript` 配置 `webpack` 減少查閱文檔和手殘的概率。
+ - :lipstick: ​ 支持 css/less/sass，使用 `mini-css-extract-plugin` 將 CSS 分離成 content CSS Script。
+ - :hammer_and_pick: 集成了社區很多的優秀的 `webpack`，`eslint` 和 `babel` 插件，優化開發，構建和打包分析體驗，還配置了 `husky` , `format-imports`, `stylelint`, `travis` 和 `audit-ci` 構建工具。
+ - :rainbow: 默認集成了 `jquery`，`lodash`，`antd` 等常用工具庫，並對它們的打包進行了優化
 
 ## :package: 安装
 
 ```bash
-# 克隆这个模板
-git clone https://github.com/tjx666/awesome-chrome-extension-boilerplate.git
 
-# 安装依赖，推荐使用 pnpm
+# 安裝依賴，推薦使用 pnpm, npm可能會報錯
 pnpm
 ```
 
-## :hammer_and_wrench: 开发
+## :hammer_and_wrench: 開發
 
-:bell: 请确保你对 chrome 扩展开发已经有基本的了解，入门推荐：[Chrome 插件(扩展)开发全攻略](http://blog.haoji.me/chrome-plugin-develop.html)。如果你对项目的配置有疑问。
+:bell: 請確保你對 chrome 擴展開發已經有基本的了解，入門推薦：[Chrome 插件(擴展)開發全攻略](http://blog.haoji.me/chrome-plugin-develop.html)。如果你對項目的配置有疑問。
 
-### 准备工作
+### 準備工作
 
-#### 修改清单文件
+#### 修改清單文件
 
-在 src 目录下有两个清单文件：`manifest.dev.json` 和 `manifest.prod.json`，分别是开发环境和生产环境的配置文件。
+使用 `src/manifest.ts` 編寫 `manifest.json`，它其實是一個 node 腳本，因此你可以使用 `server` 下面的所有模塊，可以使用環境變量處理不同開發環境的配置。
 
-**注意**：任何注入了 `content scripts` 的页面也必须被注入 `js/all.js` 和 `css/all.css` ，为了实现这一点，它俩的 `matches` 应该是其它所有 `content scripts` 的 `matches` 的父集。
+**注意**：任何注入了 `content scripts` 的頁面也必須被註入 `js/all.js` 和 `css/all.css` ，為了實現這一點，它倆的 `matches` 應該是其它所有 `content scripts` 的 `matches` 的父集。
 
-示例的配置是:
+示例的配置:
 
 ```javascript
 "content_scripts": [
-    // 所有注入了 content scripts 的页面都注入了 js/all.js 和 css/all.css
+    // 所有註入了 content scripts 的頁面都註入了 js/all.js 和 css/all.css
     {
         "matches": ["https://github.com/*"],
         "css": ["css/all.css"],
         "js": ["js/all.js"]
     },
-    // 注入到 github pull requests 页面
+    // 註入到 github pull requests 頁面
     {
         "matches": ["https://github.com/pulls"],
         "css": ["css/pulls.css"],
@@ -56,11 +54,11 @@ pnpm
 ]
 ```
 
-#### 添加静态资源
+#### 添加靜態資源
 
-`public` 下的文件会被打包到扩展的根目录，`manifest` 中用到的图标等资源可以直接放到 `public` 文件夹下面。模板在 `public/icons` 放了一些默认的图标，因此可以在 `manifest` 中这样引用图标：
+`public` 下的文件會被打包到擴展的根目錄，`manifest` 中用到的圖標等資源可以直接放到 `public` 文件夾下面。模板在 `public/icons` 放了一些默認的圖標，因此可以在 `manifest` 中這樣引用圖標：
 
-```js
+```json
 // manifest.dev.json
 {
   "icons": {
@@ -72,17 +70,17 @@ pnpm
 }
 ```
 
-### 启动 devServer
+### 啟動 devServer
 
 ```bash
 yarn start
 ```
 
-无论是开发环境还是生产环境都会在项目根目录生成 `extension` 文件夹，chrome 访问 [chrome://extensions/](chrome://extensions/) 也就是扩展管理页面，点击右上角的按钮开启开发者模式，选择加载已解压的扩展程序，再选择刚刚生成的 `extension` 文件夹即可加载扩展。
+無論是開發環境還是生產環境都會在項目根目錄生成 `extension` 文件夾，chrome 訪問 [chrome://extensions/](chrome://extensions/) 也就是擴展管理頁面，點擊右上角的按鈕開啟開發者模式，選擇加載已解壓的擴展程序，再選擇剛剛生成的 `extension` 文件夾即可加載擴展。
 
 ![load extension](https://i.loli.net/2020/03/10/rlbXpmdyu6KitVW.png)
 
-由于 `chrome` 的限制，官方的 chrome 扩展 [react devtools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi) 并不能审查 `chrome-extension://` 协议的页面如 `options`，`popup` 页面。所以需要使用独立的 [react devtools](https://www.npmjs.com/package/react-devtools)，使用下面的命令启动 devServer 的同时打开独立的 devtools 窗口：
+由於 `chrome` 的限制，官方的 chrome 擴展 [react devtools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi) 並不能審查 `chrome-extension://` 協議的頁面如 `options`，`popup` 頁面。所以需要使用獨立的 [react devtools](https://www.npmjs.com/package/react-devtools)，使用下面的命令啟動 devServer 的同時打開獨立的 devtools 窗口：
 
 ```bash
 npm run devtools
@@ -90,7 +88,7 @@ npm run devtools
 
 ![react devtools](https://i.loli.net/2020/03/10/DzK8MWHbN4YmeZU.png)
 
-你可以通过 `open` 参数配置在 webpack 初次编译成功打开某个 URL：
+你可以通過 `open` 參數配置在 webpack 初次編譯成功打開某個 URL：
 
 ```javascript
 "scripts": {
@@ -98,88 +96,83 @@ npm run devtools
     },
 ```
 
-### 编写代码
+### 編寫代碼
 
-模板默认的代码实现的功能是修改 `github` 导航栏的颜色，模板使用了 [normalize.css](https://github.com/necolas/normalize.css) 和一些自定义样式对 CSS 进行样式重置。
+模板默認的代碼實現的功能是修改 `github` 導航欄的顏色，模板使用了 [normalize.css](https://github.com/necolas/normalize.css) 和一些自定義樣式對 CSS 進行樣式重置。
 
 #### [background](https://developer.chrome.com/extensions/background_pages)
 
-如果你想开发 `background` 脚本，你可以在 `src/background` 文件夹编写你的代码。`src/background/index.ts` 是 `background` 脚本的入口，也是 `webpack` 的一个 `entry`，其它像 `options` 和 `popup` 页面也类似。你可以查看 `webpack` 的 `entry` 配置： `src/server/utils/entry.ts` 了解更多实现细节。
+如果你想開發 `background` 腳本，你可以在 `src/background` 文件夾編寫你的代碼。`src/background/index.ts` 是 `background` 腳本的入口，也是 `webpack` 的一個 `entry`，其它像 `options` 和 `popup` 頁面也類似。你可以查看 `webpack` 的 `entry` 配置： `src/server/utils/entry.ts` 了解更多實現細節。
 
 #### [options](https://developer.chrome.com/extensions/options) 和 [popup](https://developer.chrome.com/extensions/browserAction#popups)
 
-它俩的 webpack entry 分别是 `src/options/index.tsx` 和 `src/popup/index.tsx`。这两个页面很相似，都只是一个普通的 web 页面，因此你可以像开发一个 react **SPA** 一样开发它们。
+它倆的 webpack entry 分別是 `src/options/index.tsx` 和 `src/popup/index.tsx`。這兩個頁面很相似，都只是一個普通的 web 頁面，因此你可以像開發一個 react **SPA** 一樣開發它們。
 
-这个模板使用了 `react` 的最新版本，因此你可以使用 `react hooks` 去开发函数组件，`react hooks` 的 `eslint `规则也集成了。
+這個模板使用了 `react` 的最新版本，因此你可以使用 `react hooks` 去開發函數組件，`react hooks` 的 `eslint` 規則也集成了。
 
-模板使用 [React Fast Refresh](https://github.com/facebook/react/issues/16604) 支持 `react` 的热更新。
+模板使用 [React Fast Refresh](https://github.com/facebook/react/issues/16604) 支持 `react` 的熱更新。
 
 #### [content scripts](https://developer.chrome.com/extensions/content_scripts)
 
-这个模板会扫描 `src/contents` 文件夹，将所有子文件夹中的 `index.tsx` 或 `index.ts` 作为 `webpack entry`。
+這個模板會掃描 `src/contents` 文件夾，將所有子文件夾中的 `index.tsx` 或 `index.ts` 作為 `webpack entry`。
 
-`content scripts` 都放在 `src/contents` 目录下。默认有个 `all.ts`，也是个 webpack entry，它不能被删除，因为这个 webpack entry 被用于注入实现 chrome 扩展自动刷新功能的补丁。
+`content scripts` 都放在 `src/contents` 目錄下。默認有個 `all.ts`，也是個 webpack entry，它不能被刪除，因為這個 webpack entry 被用於註入實現 chrome 擴展自動刷新功能的補丁。
 
-**举个 🌰:**
+**舉個 🌰:**
 
-当你要给 URL 是 `https://www.example.com/discuss` 页面开发 `content script`，你需要做下面两步:
+當你要給 URL 是 `https://www.example.com/discuss` 頁面開發 `content script`，你需要做下面兩步:
 
-1. 添加 `content scripts` 和页面 URL 之间的映射到 `manifest.dev.json` 和 `manifest.prod.json`:
+1. 添加 `content scripts` 和頁面 URL 之間的映射到 `manifest.dev.json` 和 `manifest.prod.json`:
 
    ```json
-   "content_scripts": [
+   {
+     "content_scripts": [
        {
-           "matches": ["https://www.example.com/discuss*"],
-           "css": ["css/discuss.css"],
-           "js": ["js/discuss.js"]
+         "matches": ["https://www.example.com/discuss*"],
+         "css": ["css/discuss.css"],
+         "js": ["js/discuss.js"]
        }
-   ],
+     ]
+   }
    ```
 
-2. 创建一个和上面 `content script` 路径对应的文件夹 `src/contents/discuss`。`src/discuss/index.tsx` 或者 `src/discuss/index.ts` 将会被视为一个 webpack entry。 `webpack` 会通过这个 `entry` 最终产出 `js/discuss.js` 这个 `chunk`。
+2. 創建一個和上面 `content script` 路徑對應的文件夾 `src/contents/discuss`。`src/discuss/index.tsx` 或者 `src/discuss/index.ts` 將會被視為一個 webpack entry。 `webpack` 會通過這個 `entry` 最終產出 `js/discuss.js` 這個 `chunk`。
 
-   `mini-css-extract-plugin` 会将所有被 `discuss/index.ts` 导入的样式文件合并再分离到 `extension/css/discuss.css`，这也是为什么上面的 `manifest` 中 content CSS script 可以使用 `css/discuss.css` 的原因
+   `mini-css-extract-plugin` 會將所有被 `discuss/index.ts` 導入的樣式文件合並再分離到 `extension/css/discuss.css`，這也是為什麽上面的 `manifest` 中 content CSS script 可以使用 `css/discuss.css` 的原因
 
 ### dev server 代理
 
-你可以在 `server/configs/proxy.ts` 中配置 `dev server` 的代理，所有向 `dev serve`r 发送的请求都会根据你配置的规则被代理转发，修改配置后需要重启 `dev server` 才会生效，更多细节请查看使用的中间件 [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware)。
+你可以在 `server/configs/proxy.ts` 中配置 `dev server` 的代理，所有向 `dev serve`r 發送的請求都會根據你配置的規則被代理轉發，修改配置後需要重啟 `dev server` 才會生效，更多細節請查看使用的中間件 [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware)。
 
 ```typescript
 const proxyTable: ProxyTable = {
-  // 如果 devServer 启动地址是 http://127.0.0.1:3600
-  // 那么请求 http://127.0.0.1:3600/path_to_be_proxy 将会被 dev server 转发到 http://target.domain.com/path_to_be_proxy
+  // 如果 devServer 啟動地址是 http://127.0.0.1:3600
+  // 那麽請求 http://127.0.0.1:3600/path_to_be_proxy 將會被 dev server 轉發到 http://target.domain.com/path_to_be_proxy
   '/path_to_be_proxy': { target: 'http://target.domain.com', changeOrigin: true },
 };
 ```
 
 ## :construction_worker: 打包
 
-构建生产级别的包直接运行：
+構建生產級別的包直接運行：
 
 ```bash
 pnpm build
 ```
 
-如果你想分析打包情况：
+如果你想分析打包情況：
 
 ```bash
 pnpm build-analyze
 ```
 
-## :loudspeaker: 注意事项
+## :loudspeaker: 註意事項
 
-`src/all` 和 `src/background` 下的文件包含了实现修改 `content script` 自动重载扩展和刷新注入了 `content script` 页面的功能的代码。除非你不开发 `content scripts`，否则，**不能删除它**。
+`src/all` 和 `src/background` 下的文件包含了實現修改 `content script` 自動重載擴展和刷新註入了 `content script` 頁面的功能的代碼。除非你不開發 `content scripts`，否則，**不能刪除它**。
 
 ## :books: Blog
 
-核心原理：[使用 webpack 构建 chrome 扩展的热更新问题](https://zhuanlan.zhihu.com/p/103072251)
+核心原理：[使用 webpack 構建 chrome 擴展的熱更新問題](https://zhuanlan.zhihu.com/p/103072251)
 
-## :dart: TODO
+## :handshake: 貢獻 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-- [x] 给 manifest.json 增加 JSON 校验，目前使用的是 [SchemaStore](https://github.com/SchemaStore/schemastore) 提供的 schema，有极少部分内容已经过时了，有时间要去提个 PR。
-- [x] 支持 webpack dev server 代理
-- [x] 针对 chrome 扩展本身是个多页面应用的特点，提取多个页面的公共依赖到单独的 chunk
-
-## :handshake: 贡献 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
-
-欢迎提交 PRs 和 issues。
