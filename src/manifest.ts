@@ -9,7 +9,8 @@ const manifest: Manifest.WebExtensionManifest = {
     description: pkg.description,
     manifest_version: 3,
     minimum_chrome_version: pkg.browserslist.split(' ')[2],
-    permissions: [],
+    permissions: ['activeTab', 'declarativeContent', 'storage', 'scripting'],
+    host_permissions: ['https://www.facebook.com/*'],
     content_security_policy: {
         extension_pages: "script-src 'self' http://localhost; object-src 'self';",
     },
@@ -17,6 +18,10 @@ const manifest: Manifest.WebExtensionManifest = {
         {
             matches: ['<all_urls>'],
             resources: ['icons/*', 'images/*', 'fonts/*'],
+        },
+        {
+            resources: ['js/content.js'],
+            matches: ['https://www.facebook.com/*'],
         },
     ],
     background: {
@@ -27,6 +32,21 @@ const manifest: Manifest.WebExtensionManifest = {
             matches: ['https://github.com/*'],
             css: ['css/all.css'],
             js: ['js/all.js', ...(__DEV__ ? [] : ['js/all.js'])],
+        },
+        {
+            css: ['css/context.css'],
+            js: ['js/inject.js'],
+            run_at: 'document_end',
+            matches: [
+                'https://*.facebook.com/groups/*/permalink/*',
+                'https://*.facebook.com/permalink.php?story_fbid=*&id=*',
+                'https://*.facebook.com/*/posts/*',
+                'https://*.facebook.com/*/permalink/*',
+                'https://*.facebook.com/photo.php?fbid=*&set=a*',
+                'https://*.facebook.com/groups/*?post_id=*',
+                'https://*.facebook.com/groups/*',
+            ],
+            all_frames: true,
         },
     ],
     action: {
