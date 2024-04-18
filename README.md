@@ -8,14 +8,14 @@
 
 ## :sparkles: 特性
 
-`popup` 頁面支持 `react hot reload` & `react devtools`，充分享受現代前端工程化的便捷，讓你從開發 `SPA` 無縫切換到 chrome 擴展開發。
-
+- :fire: 支持修改 `content scripts` 代碼自動重載擴展和刷新註入了 `content scripts`的頁面，再也不用修改了 `content scripts` 後手動刷新擴展和頁面了。
+- :palm_tree: `options` 和 `popup` 頁面支持 `react hot reload` & `react devtools`，充分享受現代前端工程化的便捷，讓你從開發 `SPA` 無縫切換到 chrome 擴展開發。
 - :shield: 整個模板包括 `webpack` 配置都是用 `TypeScript` 編寫的，使用 `TypeScript` 配置 `webpack` 減少查閱文檔和手殘的概率。
 - :lipstick: ​ 支持 css/less/sass，使用 `mini-css-extract-plugin` 將 CSS 分離成 content CSS Script。
 - :hammer_and_pick: 集成了社區很多的優秀的 `webpack`，`eslint` 和 `babel` 插件，優化開發，構建和打包分析體驗，還配置了 `husky` , `format-imports`, `stylelint`, `travis` 和 `audit-ci` 構建工具。
 - :rainbow: 默認集成了 `jquery`，`lodash`，`antd` 等常用工具庫，並對它們的打包進行了優化
 
-## :package: 安装
+## :package: 安裝
 
 ```bash
 
@@ -33,9 +33,9 @@ pnpm
 
 使用 `src/manifest.ts` 編寫 `manifest.json`，它其實是一個 node 腳本，因此你可以使用 `server` 下面的所有模塊，可以使用環境變量處理不同開發環境的配置。
 
-**注意**：任何注入了 `content scripts` 的頁面也必須被註入 `js/all.js` 和 `css/all.css` ，為了實現這一點，它倆的 `matches` 應該是其它所有 `content scripts` 的 `matches` 的父集。
+**注意**：任何註入了 `content scripts` 的頁面也必須被註入 `js/all.js` 和 `css/all.css` ，為了實現這一點，它倆的 `matches` 應該是其它所有 `content scripts` 的 `matches` 的父集。
 
-示例的配置:
+示例的配置是:
 
 ```javascript
 "content_scripts": [
@@ -166,10 +166,12 @@ pnpm build
 pnpm build-analyze
 ```
 
-## :loudspeaker: 註意事項
+## :loudspeaker: 注意事項
 
 `src/all` 和 `src/background` 下的文件包含了實現修改 `content script` 自動重載擴展和刷新註入了 `content script` 頁面的功能的代碼。除非你不開發 `content scripts`，否則，**不能刪除它**。
 
 ## :books: Blog
 
 核心原理：[使用 webpack 構建 chrome 擴展的熱更新問題](https://zhuanlan.zhihu.com/p/103072251)
+
+## :handshake: 貢獻 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
