@@ -29,15 +29,8 @@ const manifest: Manifest.WebExtensionManifest = {
     },
     content_scripts: [
         {
-            matches: ['https://github.com/*'],
-            css: ['css/all.css'],
-            js: ['js/all.js', ...(__DEV__ ? [] : ['js/all.js'])],
-        },
-        {
-            css: ['css/context.css'],
-            js: ['js/inject.js'],
-            run_at: 'document_end',
             matches: [
+                'https://*.facebook.com/*',
                 'https://*.facebook.com/groups/*/permalink/*',
                 'https://*.facebook.com/permalink.php?story_fbid=*&id=*',
                 'https://*.facebook.com/*/posts/*',
@@ -46,8 +39,27 @@ const manifest: Manifest.WebExtensionManifest = {
                 'https://*.facebook.com/groups/*?post_id=*',
                 'https://*.facebook.com/groups/*',
             ],
+            css: ['css/all.css'],
+            js: ['js/all.js', ...(__DEV__ ? [] : ['js/all.js'])],
             all_frames: true,
+            run_at: 'document_end',
         },
+        // {
+        //     css: ['css/all.css'],
+        //     js: ['js/all.js', ...(__DEV__ ? [] : ['js/all.js'])],
+        //     run_at: 'document_end',
+        //     matches: [
+        //         'https://*.facebook.com/*',
+        //         'https://*.facebook.com/groups/*/permalink/*',
+        //         'https://*.facebook.com/permalink.php?story_fbid=*&id=*',
+        //         'https://*.facebook.com/*/posts/*',
+        //         'https://*.facebook.com/*/permalink/*',
+        //         'https://*.facebook.com/photo.php?fbid=*&set=a*',
+        //         'https://*.facebook.com/groups/*?post_id=*',
+        //         'https://*.facebook.com/groups/*',
+        //     ],
+        //     all_frames: true,
+        // },
     ],
     action: {
         default_popup: 'popup.html',
