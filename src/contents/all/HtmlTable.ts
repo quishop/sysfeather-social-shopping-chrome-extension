@@ -1,7 +1,7 @@
 // import { POST_MAXIMUM_LENGTH } from './const.js'
 const POST_MAXIMUM_LENGTH = 100;
 // // 要在mainifest.js 設定，才能讀到圖片
-let icon = chrome.runtime.getURL('icons/sync.svg');
+// let icon = chrome.runtime.getURL('icons/sync.svg');
 let loading = chrome.runtime.getURL('icons/giphy.gif');
 let checked = chrome.runtime.getURL('icons/checked.svg');
 let logo = chrome.runtime.getURL('icons/logo.svg');
@@ -9,14 +9,14 @@ let logo = chrome.runtime.getURL('icons/logo.svg');
 let htmlTable = {
     // 貼文按鈕
     //postButton: `<i class="fas fa-sync" style="color:#ffffff;font-size:10px;"></i><span class="spanBtn" style="color:#ffffff">匯入/更新留言</span>`,
-    postButton:
-        `<img src="` +
-        icon +
-        `" style="width:10%"><span class="spanBtn" style="color:#ffffff">匯入/更新留言</span>`,
-    tryAgain:
-        `<img src="` +
-        icon +
-        `" style="width:10%"><span class="spanBtn" style="color:#ffffff">請再點一次</span>`,
+    // postButton:
+    //     `<img src="` +
+    //     icon +
+    //     `" style="width:10%"><span class="spanBtn" style="color:#ffffff">匯入/更新留言</span>`,
+    // tryAgain:
+    //     `<img src="` +
+    //     icon +
+    //     `" style="width:10%"><span class="spanBtn" style="color:#ffffff">請再點一次</span>`,
 
     pageLiveError: `<span class="spanBtn" style="color:#ffffff">直播中，不支援</span>`,
 

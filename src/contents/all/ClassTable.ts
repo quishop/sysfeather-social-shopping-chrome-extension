@@ -396,7 +396,6 @@ initial();
 function initial() {
     for (const key in classTable) {
         classTable[key].forEach((el: any, index: any) => {
-            console.log(el);
             classTable[key][index] = '.' + classTable[key][index].replaceAll(' ', '.');
         });
     }
