@@ -5,11 +5,11 @@ import { __DEV__ } from '../server/utils/constants';
 
 const manifest: Manifest.WebExtensionManifest = {
     name: pkg.displayName,
-    version: pkg.version,
+    version: '1.0',
     description: pkg.description,
     manifest_version: 3,
     minimum_chrome_version: pkg.browserslist.split(' ')[2],
-    permissions: [],
+    permissions: ['webRequest', 'tabs', 'storage'],
     content_security_policy: {
         extension_pages: "script-src 'self' http://localhost; object-src 'self';",
     },
@@ -19,16 +19,19 @@ const manifest: Manifest.WebExtensionManifest = {
             resources: ['icons/*', 'images/*', 'fonts/*'],
         },
     ],
+
     background: {
         service_worker: 'js/background.js',
     },
     content_scripts: [
         {
-            matches: ['https://github.com/*'],
+            matches: ['<all_urls>'],
             css: ['css/all.css'],
             js: ['js/all.js', ...(__DEV__ ? [] : ['js/all.js'])],
+            run_at: 'document_start',
         },
     ],
+    host_permissions: ['<all_urls>'],
     action: {
         default_popup: 'popup.html',
         default_icon: {
