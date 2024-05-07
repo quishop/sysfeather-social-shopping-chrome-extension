@@ -52,9 +52,9 @@ try {
                 break;
             }
         }
-
+        let commitMutationObserver;
         fetchCommentsList(node);
-        // check(node, null);
+
         // console.log('SwitchNode:', getCommitSwitchNode(node));
         // switchContentState(node);
         // for (const postCommitDiv of classTable.postCommitDiv) {
@@ -357,11 +357,9 @@ function fetchCommentsList(node) {
         }
     }
     console.log('oneComments:', oneComments);
-    for (const oneComment of oneComments) {
-        if (oneComment.hasAttribute('style')) {
-            check_style = false;
-            break;
-        }
+    let hasMore = false;
+    if (oneComments) {
+        check(node, null);
     }
 }
 
@@ -384,10 +382,18 @@ async function check(node, resolve) {
     //         break;
     //     }
     // }
-
+    await wait(2000);
     let checkMoreStatus = clickcheckMore(node);
     let clickMoreStatus = clickMoreCommit(node);
     console.log('status:', checkMoreStatus, clickMoreStatus);
+    if (checkMoreStatus && checkMoreStatus == clickMoreStatus) {
+        //找留言列表準備抓留言內容
+        //if (is_load) return;
+        console.log('invokeds');
+        await wait(2000);
+        fetchCommentsList(node);
+    }
+
     // // 留言數量超過STOP_COMMENT_LENGTH 就匯入更新貼文
     // if (len >= STOP_COMMENT_LENGTH) {
     //     //if (is_load) return;
