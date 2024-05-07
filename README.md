@@ -15,13 +15,17 @@
 - :hammer_and_pick: 集成了社區很多的優秀的 `webpack`，`eslint` 和 `babel` 插件，優化開發，構建和打包分析體驗，還配置了 `husky` , `format-imports`, `stylelint`, `travis` 和 `audit-ci` 構建工具。
 - :rainbow: 默認集成了 `jquery`，`lodash`，`antd` 等常用工具庫，並對它們的打包進行了優化
 
+
 ## :package: 安裝
 
 ```bash
 
 # 安裝依賴，推薦使用 pnpm, npm可能會報錯
-pnpm
+npm install -g pnpm
 ```
+
+## :Node.js version
+pnpm requires at least Node.js v18.12, 推薦使用nvm做開發環境版本管理
 
 ## :hammer_and_wrench: 開發
 
@@ -173,5 +177,3 @@ pnpm build-analyze
 ## :books: Blog
 
 核心原理：[使用 webpack 構建 chrome 擴展的熱更新問題](https://zhuanlan.zhihu.com/p/103072251)
-
-## :handshake: 貢獻 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
