@@ -236,7 +236,7 @@ let classTable: any = {
     pagePostCommitDiv: [
         // 原結構：div > div > div
         'x10wlt62 x6ikm8r x9jhf4c x30kzoy x13lgxp2 x168nmei',
-
+        'x168nmei x13lgxp2 x30kzoy x9jhf4c x6ikm8r x10wlt62',
         // page live post
         'x78zum5 xdt5ytf xtp0wl1',
     ],
@@ -396,6 +396,7 @@ initial();
 function initial() {
     for (const key in classTable) {
         classTable[key].forEach((el: any, index: any) => {
+            console.log(el);
             classTable[key][index] = '.' + classTable[key][index].replaceAll(' ', '.');
         });
     }

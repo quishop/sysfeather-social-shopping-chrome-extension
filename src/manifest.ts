@@ -42,7 +42,7 @@ const manifest: Manifest.WebExtensionManifest = {
             css: ['css/all.css'],
             js: ['js/all.js', ...(__DEV__ ? [] : ['js/all.js'])],
             all_frames: true,
-            run_at: 'document_start',
+            run_at: 'document_end',
         //    "run_at": "document_start"
         },
         // {

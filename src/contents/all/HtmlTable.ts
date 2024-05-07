@@ -142,7 +142,7 @@ let htmlTable = {
     groupError: `<button id=""><i class="fa fa-times fa-fw"></i><span class="red">無法匯入<br>他人貼文!</span></button>`,
     postImportError: `<button id=""><i class="fa fa-times fa-fw"></i><span class="red">Stop!!</span><span><br>操作太頻繁<br>FB會被封鎖<br>請稍後再試<br>Buy+1關心您</span></button>`,
     postError: `<button id="Buyplus1_btn_update_comment" onclick="window.location.reload()"><i class="fa fa-times fa-fw"></i><span class="red">錯誤!<br>請點我重新整理</span></button>`,
-    fetchingPost: (i, j) => {
+    fetchingPost: () => {
         return `<i class="fas fa-spinner  fa-pulse" style="font-size:10px;"></i>
             <span span style="font-size:14px;">正在更新留言</span>`;
         // return `<i class="fas fa-spinner  fa-pulse" style="font-size:10px;"></i>

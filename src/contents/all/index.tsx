@@ -3,83 +3,97 @@ import { sendMessage } from 'webext-bridge';
 import './style.scss';
 import { classTable } from './ClassTable';
 import { htmlTable } from './HtmlTable';
-// console.log(`Current page's url must be prefixed with https://www.facebook.com/`);
 
+const STOP_COMMENT_LENGTH = 2000;
 // Intercept fetch requests
-console.log('123')
-const originalFetch = window.fetch;
-window.fetch = function (...args) {
-    return originalFetch.apply(this, args).then((response) => {
-        const clone = response.clone(); // Clone to not interfere with the stream
-        clone.text().then((text) => {
-            console.log(`Fetch request to ${response.url} responded with`, text);
-            // Handle or log the text response here
-        }).catch(error => console.error("Error reading response text", error));
-        return response; // Return the original response so the page can operate normally
-    }).catch(error => console.error("Fetch failed", error));
-};
+try {
+    if (isFacebookPostUrl(window.location.href)) {
+        // console.log('124');
+        // let div = document.createElement('div');
+        // div.id = 'myCustomUI';
+        // div.innerHTML = '<h1>Hello, this is my custom UI!</h1>';
+        // // Append the custom UI to the body of the page
+        // document.body.appendChild(div);
 
-// Intercept XMLHttpRequest
-const originalOpen = XMLHttpRequest.prototype.open;
-XMLHttpRequest.prototype.open = function (method, url) {
-    this.url = url; // Save URL to use in the load event
-    originalOpen.apply(this, arguments);
-};
+        // // Optionally, inject some CSS
+        // let style = document.createElement('style');
 
-const originalSend = XMLHttpRequest.prototype.send;
-XMLHttpRequest.prototype.send = function (body) {
-    this.addEventListener('load', function () {
-        console.log(`XHR request to ${this.url} responded with`, this.responseText);
-        // Handle or log the responseText here
-    });
-    originalSend.apply(this, arguments);
-};
+        // style.textContent = `
+        //     #myCustomUI {
+        //         position: fixed;
+        //         top: 0;
+        //         right: 0;
+        //         background: white;
+        //         border: 1px solid black;
+        //         padding: 10px;
+        //         z-index: 1000;
+        //     }
+        //     `;
+        // document.head.appendChild(style);
 
-// try {
-//     if (isFacebookPostUrl(window.location.href)) {
-//         let div = document.createElement('div');
-//         div.id = 'myCustomUI';
-//         div.innerHTML = '<h1>Hello, this is my custom UI!</h1>';
-//         // Append the custom UI to the body of the page
-//         document.body.appendChild(div);
+        // sendMessage('hello-from-content-script', '123', 'background');
+        getCreationTime(1).then((response) => {
+            const data = {
+                author: getAuthorFromClass(),
+                createTime: new Date(response * 1000),
+                commentsLength: getFBCommitLength(),
+            };
+            sendMessage('hello-from-content-script', data, 'background');
+        });
 
-//         // Optionally, inject some CSS
-//         let style = document.createElement('style');
+        let node;
+        // while (!node) {
+        for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
+            const pagePostCommitDiv = document
+                .querySelector('body')
+                .querySelector(pagePostCommitClass);
+            if (pagePostCommitDiv) {
+                node = pagePostCommitDiv;
+                break;
+            }
+        }
 
-//         style.textContent = `
-//             #myCustomUI {
-//                 position: fixed;
-//                 top: 0;
-//                 right: 0;
-//                 background: white;
-//                 border: 1px solid black;
-//                 padding: 10px;
-//                 z-index: 1000;
-//             }
-//             `;
-//         document.head.appendChild(style);
+        fetchCommentsList(node);
+        // check(node, null);
+        // console.log('SwitchNode:', getCommitSwitchNode(node));
+        // switchContentState(node);
+        // for (const postCommitDiv of classTable.postCommitDiv) {
+        //     const commitClass = document.querySelector('body').querySelector(postCommitDiv);
+        //     if (commitClass) {
+        //         this.postCommit = commitClass;
+        //         break;
+        //     }
+        // }
+        // const val = startFetchCommitComments(document.querySelector('body'), []);
+        // console.log('test 123:', val);
+        // console.log('test 123:', getContentFn());
+    }
+} catch (e) {
+    console.log('error:', e);
+}
 
-//         // getCreationTime(1).then((response) => {
-//         //     const data = {
-//         //         author: getAuthorFromClass(),
-//         //         createTime: new Date(response * 1000),
-//         //         commentsLength: getFBCommitLength(),
-//         //     };
-//         //     sendMessage('hello-from-content-script', data, 'background');
-//         // });
-//         // fetchCommentsList();
-//         // for (const postCommitDiv of classTable.postCommitDiv) {
-//         //     const commitClass = document.querySelector('body').querySelector(postCommitDiv);
-//         //     if (commitClass) {
-//         //         this.postCommit = commitClass;
-//         //         break;
-//         //     }
-//         // }
-//         // const val = startFetchCommitComments(document.querySelector('body'), []);
-//         // console.log('test 123:', val);
-//         // console.log('test 123:', getContentFn());
-//     }
-// } catch (e) {}
+async function switchContentState(node) {
+    const commitstats = await getCommitSwitchNode(node);
+    let textcontent = '';
+    try {
+        textcontent = commitstats.textContent;
+    } catch (e) {}
+
+    let doCheckMoreComment = false;
+
+    if (textcontent.indexOf('最相關') != -1 || textcontent.indexOf('最熱門留言') != -1) {
+        doCheckMoreComment = true;
+    }
+
+    console.log('doCheckMoreComment:', textcontent, doCheckMoreComment);
+    if (doCheckMoreComment) {
+        console.log('invoked');
+        await commitstats.click();
+        let selectCommitShowTmpBtn = getCommitSortListBtn(1);
+        console.log('selectCommitShowTmpBtn:', selectCommitShowTmpBtn);
+        await selectCommitShowTmpBtn.click();
+    }
+}
 
 function isFacebookPostUrl(url: string) {
     const regexPermalink = /^https:\/\/www\.facebook\.com\/groups\/(\d+)\/permalink\/(\d+)\/$/;
@@ -193,6 +207,36 @@ function getAuthorFromClass() {
     return classAuthor;
 }
 
+/**
+ * - 取得切換留言排序的節點
+ * @param {node} nodes - 搜尋的節點
+ * @returns {node} - 切換留言的節點
+ */
+function getCommitSwitchNode(nodes) {
+    let commitstats = null;
+    try {
+        /*
+      找出切換留言顯示方式CSS                                                               
+      /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div[4]/div/div/div/div/div/div/div[1]/div/div/div/div/div/div/div/div/div/div/div[8]/div/div[4]/div/div/div[2]/div[2]/div/div/div/span
+      */
+        for (let i = 0; i < classTable.postCommentSortClass.length; i++) {
+            const element = classTable.postCommentSortClass[i];
+            if (nodes.querySelector(element)) {
+                for (let count = 0; count < classTable.postCommitState.length; count++) {
+                    const postCommitStateClass = classTable.postCommitState[count];
+                    commitstats = nodes.querySelector(element).querySelector(postCommitStateClass);
+                    if (commitstats) break;
+                }
+                if (commitstats) break;
+            }
+        }
+    } catch (e) {
+        // console.log("no change")
+    }
+
+    return commitstats;
+}
+
 function getUserInfoSearchUserIDByScript(scriptStringList) {
     let userInfo = {
         id: '',
@@ -243,6 +287,18 @@ function getAccountUsersByScriptStringList(scriptStringList) {
     return author;
 }
 
+function extractUserStringByAccountUser(scriptString) {
+    const userStringStart = scriptString.search('"account_user');
+    const userStringEnd = scriptString.search('"extensions');
+
+    if (userStringStart > 0 && userStringEnd > 0) {
+        const userStringLength = userStringEnd - userStringStart - 3;
+        return scriptString.substr(userStringStart, userStringLength);
+    }
+
+    return null;
+}
+
 function getAccountUsersAtBottomUserByScriptStringList(scriptStringList) {
     let author = {
         id: '',
@@ -274,9 +330,11 @@ function extractUserStringByBottomUser(scriptString) {
     return null;
 }
 
-function fetchCommentsList() {
+function fetchCommentsList(node) {
     // var unorderedList = nodes.querySelector('ul:not([class])');
-    const node = document.querySelector('body');
+    if (!node) {
+        return;
+    }
     var unorderedList = node.querySelector('ul:not([class])');
     let check_style = true;
 
@@ -291,6 +349,7 @@ function fetchCommentsList() {
     }
     console.log('unorderedList:', unorderedList);
     let oneComments = '';
+    const res = [];
     for (const OneCommentDiv of classTable.OneCommentDiv) {
         oneComments = unorderedList.querySelectorAll('div' + OneCommentDiv);
         if (oneComments) {
@@ -304,6 +363,232 @@ function fetchCommentsList() {
             break;
         }
     }
+}
+
+async function wait(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
+
+async function check(node, resolve) {
+    await wait(1000);
+
+    // //if (is_load) return;
+    // if (len >= STOP_COMMENT_LENGTH) return;
+
+    // for (const postCommitNode of classTable.postCommitNode) {
+    //     const postCommentListNode = node.querySelectorAll(postCommitNode);
+    //     if (postCommentListNode.length > 0) {
+    //         len = postCommentListNode.length;
+    //         break;
+    //     }
+    // }
+
+    let checkMoreStatus = clickcheckMore(node);
+    let clickMoreStatus = clickMoreCommit(node);
+    console.log('status:', checkMoreStatus, clickMoreStatus);
+    // // 留言數量超過STOP_COMMENT_LENGTH 就匯入更新貼文
+    // if (len >= STOP_COMMENT_LENGTH) {
+    //     //if (is_load) return;
+    //     is_load = true;
+    //     fetchCommit(resolve);
+    // } else {
+    //     await wait(2000);
+    //     let checkMoreStatus = clickcheckMore(nodes);
+    //     let clickMoreStatus = clickMoreCommit(nodes);
+
+    //     // 如果沒有可以展開的按鈕就匯入更新貼文
+    //     if (!checkMoreStatus && checkMoreStatus == clickMoreStatus) {
+    //         //找留言列表準備抓留言內容
+    //         //if (is_load) return;
+    //         is_load = true;
+    //         await wait(2000);
+    //         fetchCommit(resolve);
+    //     }
+    // }
+}
+
+// 檢查是否還有更多留言按鈕。
+// 回傳true 表示點擊按鈕，畫面可能會變動。
+function clickcheckMore(nodes) {
+    //留言內的點擊更多的CSS
+    /*
+    /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div[4]/div/div/div/div/div/div/div[1]/div/div/div/div/div/div/div/div/div/div/div[8]/div/div[4]/div/div/div[2]/div[2]/div[1]/div[2]/span/span
+    */
+    let postContentMoreElements = nodes.querySelectorAll(classTable.postContentMore);
+    let count = 0;
+    //篩選一模一樣的關鍵字點擊展開
+    for (let i = 0; i < postContentMoreElements.length; i++) {
+        const element = postContentMoreElements[i];
+        for (let j = 0; j < htmlTable.postCommitMore.length; j++) {
+            if (element.textContent == htmlTable.postCommitMore[j]) {
+                if (element.textContent.indexOf('隱藏') == '-1') {
+                    count++;
+                    element.click();
+                }
+            }
+        }
+
+        //模糊篩選關鍵字點擊展開
+        for (let k = 0; k < htmlTable.postCommitMoreFuzzy.length; k++) {
+            if (element.textContent.indexOf(htmlTable.postCommitMoreFuzzy[k]) != '-1') {
+                if (element.textContent.indexOf('隱藏') == '-1') {
+                    count++;
+                    element.click();
+                }
+            }
+        }
+        /*
+      if(el.textContent.indexOf("則回覆") != "-1") {
+        if(el.textContent.indexOf("檢視") != "-1") {
+          count++
+          el.click()
+        }
+      }
+      if(el.textContent.indexOf("已回覆") != "-1") {
+        if(el.textContent.indexOf("則回覆") != "-1") {
+          count++
+          el.click()
+        }
+      }
+      */
+
+        /*
+      if (el.textContent == "查看更多" || el.textContent == "顯示更多") {
+
+        count++
+        el.click()
+      }
+      */
+    }
+
+    if (count != 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+// 檢查是否還有更多留言按鈕。
+// 回傳true 表示點擊按鈕，畫面可能會變動。
+function clickMoreCommit(nodes) {
+    if (!nodes) {
+        //等待檢查是否會有空值情況發生
+        return false;
+    }
+
+    // let commitstats = null
+    // //classTable.CommentUlClass 是整篇留言最外層的DIV
+    // /*
+    // /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div[4]/div/div/div/div/div/div/div[1]/div/div/div/div/div/div/div/div/div/div/div[8]/div/div[4]/div/div/div[2]
+    // */
+    // for (let i = 0; i < classTable.CommentUlClass.length; i++) {
+    //   if (nodes.querySelector(classTable.CommentUlClass[i])) {
+    //     commitstats = nodes.querySelector(classTable.CommentUlClass[i])
+    //   }
+    // }
+    // if (!commitstats) return true
+
+    let moreCommit = null;
+    for (let i = 0; i < classTable.postViewCommitCommit.length; i++) {
+        const element = classTable.postViewCommitCommit[i];
+        moreCommit = nodes.querySelector(element);
+        if (moreCommit) break;
+    }
+    let loading = null;
+    for (let i = 0; i < classTable.postViewCommitLoad.length; i++) {
+        const element = classTable.postViewCommitLoad[i];
+        loading = nodes.querySelector(element);
+        if (loading) break;
+    }
+    if (!moreCommit && !loading) {
+        return false;
+    }
+    let count = 0;
+    let moreCommitArr = null;
+    for (let i = 0; i < classTable.postViewCommitCommit.length; i++) {
+        const element = classTable.postViewCommitCommit[i];
+        moreCommitArr = nodes.querySelectorAll(element);
+        if (moreCommitArr.length > 0) break;
+    }
+    for (let i = 0; i < moreCommitArr.length; i++) {
+        const element = moreCommitArr[i];
+        if (element.hasChildNodes() && element.textContent.indexOf('隱藏') == -1) {
+            count++;
+            element.click();
+        }
+    }
+    if (count || loading) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * - 返回我要點擊排序的btn
+ * @param {integer} funcType - 使用方法
+ * @returns {node} - 返回找到的btn節點
+ */
+function getCommitSortListBtn(funcType) {
+    let selectCommitShowNewBtn = null;
+    switch (funcType) {
+        case 1:
+            selectCommitShowNewBtn = getCommitSwitchBtn(getCommitSortListNode);
+            break;
+    }
+    console.log('selectCommitShowNewBtn:', selectCommitShowNewBtn);
+    return selectCommitShowNewBtn;
+}
+
+/**
+ * - 找出他切換留言顯示方式(EX:最新，最相關，即時留言)
+ * @param {function} nodeFetcher - 注入選擇節點的方法
+ * @returns {node} 返回目標btn Node
+ */
+function getCommitSwitchBtn(nodeFetcher) {
+    /*
+    /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[2]/div/div/div[1]/div[1]/div/div/div[1]/div/div/div/div[1]/div/div[1]
+    */
+    let commitSortList = nodeFetcher();
+    let switchNewBtn = null;
+    let selectCommitShowTmp = null;
+    for (let i = 0; i < classTable.postCommitlastState.length; i++) {
+        const element = classTable.postCommitlastState[i];
+        selectCommitShowTmp = commitSortList.querySelectorAll(element);
+        if (selectCommitShowTmp.length > 0) break;
+    }
+
+    //選擇最新留言顯示
+    if (selectCommitShowTmp[selectCommitShowTmp.length - 1].innerText.indexOf('隱藏') != '-1') {
+        for (let i = 0; i < selectCommitShowTmp.length; i++) {
+            if (selectCommitShowTmp[i].innerText.indexOf('最新') != '-1') {
+                switchNewBtn = selectCommitShowTmp[i];
+            }
+        }
+    } else {
+        switchNewBtn = selectCommitShowTmp[selectCommitShowTmp.length - 1];
+    }
+    console.log('switchNewBtn:', switchNewBtn);
+    return switchNewBtn;
+}
+
+//commitSortList 是找出他是找出他切換留言顯示方式的框框
+function getCommitSortListNode() {
+    /*
+    /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[2]/div/div/div[1]
+    */
+    let commitSortList = null;
+    for (let i = 0; i < classTable.postCommitlast.length; i++) {
+        const element = classTable.postCommitlast[i];
+        commitSortList = document.querySelectorAll(element);
+        if (commitSortList.length > 0) {
+            commitSortList = commitSortList[commitSortList.length - 1];
+            break;
+        }
+    }
+    console.log('commitSortList:', commitSortList);
+    return commitSortList;
 }
 
 // // 初始化抓留言list dom的地方
