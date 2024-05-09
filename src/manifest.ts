@@ -32,6 +32,7 @@ const manifest: Manifest.WebExtensionManifest = {
             matches: [
                 'https://*.facebook.com/*',
                 'https://*.facebook.com/groups/*/permalink/*',
+                'https://*.facebook.com/groups/*/posts/*',
                 'https://*.facebook.com/permalink.php?story_fbid=*&id=*',
                 'https://*.facebook.com/*/posts/*',
                 'https://*.facebook.com/*/permalink/*',
