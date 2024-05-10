@@ -18,5 +18,12 @@ console.log('This is background page!');
 //     },
 //     { urls: ['https://www.facebook.com/*'] }, // This pattern matches all URLs
 // );
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'openTab') {
+        chrome.tabs.create({ url: request.url, active: false });
+        sendResponse({ status: 'Tab opened in background' });
+    }
+});
 // WEBPACK FOOTER //
 // ./src/backend/index.js

@@ -1,36 +1,44 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import ActionPanel from './components/ActionPanel';
 import { sendMessage } from 'webext-bridge';
 // // import { main } from './components/MainFixedWindow.js';
 import './style.scss';
 import { classTable } from './ClassTable';
 import { htmlTable } from './HtmlTable';
 
-const STOP_COMMENT_LENGTH = 2000;
 // Intercept fetch requests
 try {
     if (isFacebookPostUrl(window.location.href)) {
-        console.log('124');
-        let div = document.createElement('div');
-        div.id = 'myCustomUI';
-        div.innerHTML = '<h1>Hello, this is my custom UI!</h1>';
-        // Append the custom UI to the body of the page
+        console.log('render')
+        // let div = document.createElement('div');
+        // div.id = 'myCustomUI';
+        // div.innerHTML = '<h1>Hello, this is my custom UI!</h1>';
+        // // Append the custom UI to the body of the page
+        // document.body.appendChild(div);
+
+        // // // Optionally, inject some CSS
+        // let style = document.createElement('style');
+
+        // style.textContent = `
+        //     #myCustomUI {
+        //         position: fixed;
+        //         top: 0;
+        //         right: 0;
+        //         background: white;
+        //         border: 1px solid black;
+        //         padding: 10px;
+        //         z-index: 1000;
+        //     }
+        //     `;
+        // document.head.appendChild(style);
+        // src/contentScript.js
+
+        const div = document.createElement('div');
         document.body.appendChild(div);
-
-        // Optionally, inject some CSS
-        let style = document.createElement('style');
-
-        style.textContent = `
-            #myCustomUI {
-                position: fixed;
-                top: 0;
-                right: 0;
-                background: white;
-                border: 1px solid black;
-                padding: 10px;
-                z-index: 1000;
-            }
-            `;
-        document.head.appendChild(style);
-        console.log('invoked 0:');
+        const root = createRoot(div);
+        root.render(<ActionPanel />);
+        console.log('done')
         // document.addEventListener('DOMContentLoaded', function () {
         //     console.log('invoked:' )
         //     var newDiv = document.createElement('div');
@@ -113,9 +121,10 @@ async function switchContentState(node) {
 function isFacebookPostUrl(url: string) {
     console.log('url:', url);
     const regexPermalinkAndPost =
-        /^https:\/\/www\.facebook\.com\/groups\/\d+\/(posts|permalink)\/\d+$/;
+    /^https:\/\/www\.facebook\.com\/groups\/(\d+)\/permalink\/(\d+)$/;
     const regexPost =
-        /^https:\/\/www\.facebook\.com\/(groups\/\d+\/(posts|permalink)\/\d+|posts\/\d+)$/;
+    /^https:\/\/www\.facebook\.com\/groups\/(\d+)\/posts\/(\d+)$/;
+
     return regexPermalinkAndPost.test(url) || regexPost.test(url);
 }
 
