@@ -5,27 +5,40 @@ import {
     getCreationTime,
     getFBCommitLength,
     getAuthorFromClass,
+    getHeader,
+    getGroupNameClass,
+    getPostNumInfo,
+    getContentFn,
+    getTargetPostClassFromDocumentBody,
 } from '../../../all/index';
+import e from 'cors';
 const { Title } = Typography;
 
 const ActionPanel = () => {
     const [loadings, setLoadings] = useState<boolean>(false);
 
     function getPostDetail() {
-        // console.log('invoded:');
-        const fetch1 = getPostOwnerId();
-        const fetch2 = getCreationTime(1);
-        Promise.all([fetch1, fetch2]).then((response) => {
-            const data = {
-                author: getAuthorFromClass(),
-                authorId: response[0],
-                createTime: new Date((response[1] as number) * 1000),
-                commentsLength: getFBCommitLength(),
-            };
-            console.log('data:', data);
+        console.log('getHeader:', getContentFn().trim());
+        // getPostNumInfo(1).then((res) => {
+        //     console.log('getPostNumInfo:', res);
+        // });
+        // const fetch1 = getPostOwnerId();
+        // const fetch2 = getCreationTime(1);
+        // Promise.all([fetch1, fetch2])
+        //     .then((response) => {
+        //         const data = {
+        //             author: getAuthorFromClass(),
+        //             authorId: response[0],
+        //             createTime: new Date((response[1] as number) * 1000),
+        //             commentsLength: getFBCommitLength(),
+        //         };
+        //         console.log('data:', data);
 
-            // sendMessage('hello-from-content-script', data, 'background');
-        });
+        //         // sendMessage('hello-from-content-script', data, 'background');
+        //     })
+        //     .catch((e) => {
+        //         console.log('error:', e);
+        //     });
     }
 
     return (

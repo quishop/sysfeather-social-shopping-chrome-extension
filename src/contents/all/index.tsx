@@ -11,7 +11,7 @@ import { htmlTable } from './HtmlTable';
 try {
     if (isFacebookPostUrl(window.location.href)) {
         console.log('render2');
-        // console.log('getCreationTimeByPostHtml:', getCreationTimeByPostHtml());
+        console.log('getTargetPostClassFromDocumentBody():', getTargetPostClassFromDocumentBody());
         // let div = document.createElement('div');
         // div.id = 'myCustomUI';
         // div.innerHTML = '<h1>Hello, this is my custom UI!</h1>';
@@ -1039,4 +1039,265 @@ export function findImageUrl(node) {
         }
     }
     return '';
+}
+
+// 取得貼文url
+function getPostUrl() {
+    const url = getPostUrlFromComment();
+    if (url) return url;
+
+    const header = getHeader();
+    if (header && header.href) {
+        const urlFromHeader = header.href.match('.*/posts/[0-9]+');
+        if (urlFromHeader && urlFromHeader[0]) {
+            return urlFromHeader[0];
+        }
+    }
+
+    return null;
+}
+
+// 從留言時間取得貼文url
+function getPostUrlFromComment() {
+    for (const commentTimeNode of classTable.commentTime) {
+        const commentTimeClass = postCommit.querySelector(commentTimeNode);
+        if (commentTimeClass && commentTimeClass.href) {
+            const commentTimeUrl = commentTimeClass.href.match('.*/posts/[0-9]+');
+            if (commentTimeUrl && commentTimeUrl[0]) {
+                return commentTimeUrl[0];
+            }
+        }
+    }
+    return null;
+}
+
+// 取得貼文header
+export function getHeader(i) {
+    let node = document.querySelector('body'); // this.postHeader
+    let header = '';
+    /*
+    貼文人姓名的超連結
+    /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div[4]/div/div/div/div/div/div/div[1]/div/div/div/div/div/div/div/div/div/div/div[8]/div/div[2]/div/div[2]/div/div[1]/span/h3/span/span/a
+    */
+    let headerHtml =
+        // node.querySelectorAll("div.xu06os2.x1ok221b a.x1i10hfl");
+        node.querySelectorAll('div.xu06os2.x1ok221b span.x4k7w5x.x1h91t0o a.x1i10hfl');
+
+    for (let i = 0; i < headerHtml.length; i++) {
+        if (headerHtml[i].href.search('posts') != -1) {
+            header = headerHtml[i];
+            break;
+        }
+        // Facebook 將連結網址隱藏起來，直到滑鼠連結上。
+        if (headerHtml[i].href.slice(-1) == '#') {
+            header = headerHtml[i];
+            break;
+        }
+        if (headerHtml[i].href.search('permalink') != -1) {
+            header = headerHtml[i];
+            break;
+        }
+        if (headerHtml[i].href.search('groups') != -1) {
+            if (headerHtml[i].href.search('user') != -1) {
+            } else {
+                header = headerHtml[i];
+                break;
+            }
+        }
+    }
+
+    /*
+          if(typeof node.querySelector(".buofh1pr").querySelectorAll(".qzhwtbm6.knvmm38d")[i].querySelectorAll("a")[i] !="undefined"){
+            header = node.querySelector(".buofh1pr").querySelectorAll(".qzhwtbm6.knvmm38d")[i].querySelectorAll("a")[i]
+          } else {
+            header = node.querySelector(".buofh1pr").querySelectorAll(".qzhwtbm6.knvmm38d")[i].querySelector("a")
+          }
+    */
+    return header;
+}
+
+//取得社團名稱div資訊
+export async function getGroupNameClass() {
+    let groupName = null;
+    //取社團名稱(用社團名稱超連結的CSS)
+    /*
+    /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div[1]/div[2]/div/div/div/div/div[1]/div/div/div/div[1]/div/div[1]/h1/span/a
+    */
+    for (let i = 0; i < classTable.group_name.length; i++) {
+        const groupNameNode = classTable.group_name[i];
+        groupName = document.querySelector(groupNameNode);
+        if (groupName) break;
+    }
+    return groupName;
+}
+
+/**
+ *  - 取得本頁貼文Id url postNum
+ * @param {integer} funcType - 尋找的方法
+ * @param {object} postGroupInfo - 團別貼文資訊
+ * @returns {object} - 返回貼文url object
+ */
+export async function getPostNumInfo(funcType) {
+    let fbPostInfo = {
+        url: '',
+        num: '',
+    };
+
+    switch (funcType) {
+        case 1:
+            fbPostInfo = await getPostNumFromUrl(getPostNumFromUrlBySplitWord);
+            if (fbPostInfo.num == null) {
+                fbPostInfo = await getPostNumFromHeader();
+            }
+            break;
+        case 2:
+            fbPostInfo = await getPostNumFromUrl(getPostNumFromUrlBySplitWordNoPost);
+            break;
+    }
+
+    fbPostInfo = fixedPostInfo(fbPostInfo);
+
+    return fbPostInfo;
+}
+
+async function getPostNumFromUrl(domFetcher) {
+    let fbPostUrl = window.location.toString();
+    let fbPostInfo = {
+        url: '',
+        num: '',
+    };
+
+    //嘗試在url上抓到postnum
+    fbPostInfo.num = domFetcher(fbPostUrl);
+    if (fbPostInfo.num) {
+        fbPostInfo.url = fbPostUrl;
+    }
+
+    return fbPostInfo;
+}
+
+function getPostNumFromUrlBySplitWord(url) {
+    let num = null;
+    if (url !== null) {
+        if (url.includes('/posts/')) {
+            num = url.split('posts/')[1].split('/')[0];
+        } else if (url.includes('/permalink/')) {
+            num = url.split('permalink/')[1].split('/')[0];
+        }
+    }
+
+    if (num != null && num.includes('?a=buyplus1__do')) {
+        num = num.split('?a=buyplus1__do')[0];
+    }
+
+    return num;
+}
+
+function getPostNumFromUrlBySplitWordNoPost(url) {
+    let num = null;
+    if (url != null) {
+        if (url.includes('/posts/')) {
+            num = url.split('posts/')[1].split('/')[0];
+        } else if (url.includes('/permalink/')) {
+            num = url.split('permalink/')[1].split('/')[0];
+        } else if (url.includes('/www.facebook.com/')) {
+            num = url.split('/www.facebook.com/')[1].split('/')[0];
+        }
+    }
+
+    if (num != null && num.includes('?a=buyplus1__do')) {
+        num = num.split('?a=buyplus1__do')[0];
+    }
+    return num;
+}
+
+/**
+ * 修正最後出來的fbPost物件
+ * @param {object} fbPostInfo
+ * @returns
+ */
+function fixedPostInfo(fbPostInfo) {
+    if (fbPostInfo.num && fbPostInfo.num.indexOf('?comment_id') != -1) {
+        fbPostInfo.num = fbPostInfo.num.split('?comment_id')[0];
+    }
+    return fbPostInfo;
+}
+
+async function getPostNumFromHeader() {
+    let fbPostInfo = {
+        url: '',
+        num: '',
+    };
+    await getHeader(1).focus();
+    if (getHeader(1).href.indexOf('?__cft__[0]=') != -1) {
+        fbPostInfo.url = getHeader(1).href.split('?__cft__[0]=')[0];
+        fbPostInfo.num = fbPostInfo.url.split('/').filter((el) => el != '')[5];
+    }
+    return fbPostInfo;
+}
+
+export const content = (selector) => {
+    // let contentNodes = postContentNode.querySelector(selector);
+    const targetNode = getTargetPostClassFromDocumentBody()[0].parentNode.parentNode;
+    if (targetNode) {
+        let contentNodes = targetNode.childNodes[2].querySelector(selector);
+        console.log('contentNodes:', targetNode.childNodes[2], contentNodes);
+    }
+    return getContentText(targetNode.childNodes[2]);
+    //  return getContentText(contentNodes);
+};
+
+export const getContentFn = () => {
+    for (let i = 0; i < classTable.postContent.length; i++) {
+        let contentElement = classTable.postContent[i];
+        const text = content(contentElement);
+        console.log('text:', text, contentElement);
+        if (text && text.trim() != '點擊可標註商品') {
+            return text;
+        }
+    }
+
+    return '';
+};
+
+const getContentText = (contentNode) => {
+    if (contentNode !== null) {
+        if (contentNode.hasChildNodes()) {
+            let text = '';
+            contentNode.childNodes.forEach((element) => {
+                text += getContentText(element);
+            });
+
+            if (contentNode.tagName != undefined && contentNode.tagName == 'DIV') {
+                text += '\n';
+            }
+            return text;
+        } else if (!contentNode.hasChildNodes() && contentNode.tagName == 'BR') {
+            return '\n';
+        } else {
+            return contentNode.textContent;
+        }
+    }
+
+    return '';
+};
+
+//處理dom行為的function
+export function getTargetPostClassFromDocumentBody() {
+    const _this = this;
+    let postClass = getTargetFromClassTablePost(document.querySelector('body'));
+    return postClass;
+}
+
+/* @param {Node} targetNode 目標節點
+ * @returns {Node} 返回找到的節點
+ */
+function getTargetFromClassTablePost(targetNode) {
+    let target = null;
+    for (let i = 0; i < classTable.postClass.length; i++) {
+        target = targetNode.querySelectorAll(classTable.postClass[i]);
+        if (target.length > 0) break;
+    }
+    console.log('target:', target);
+    return target;
 }
