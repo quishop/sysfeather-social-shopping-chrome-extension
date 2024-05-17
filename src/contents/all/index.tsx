@@ -10,7 +10,8 @@ import { htmlTable } from './HtmlTable';
 // Intercept fetch requests
 try {
     if (isFacebookPostUrl(window.location.href)) {
-        console.log('render')
+        console.log('render2');
+        // console.log('getCreationTimeByPostHtml:', getCreationTimeByPostHtml());
         // let div = document.createElement('div');
         // div.id = 'myCustomUI';
         // div.innerHTML = '<h1>Hello, this is my custom UI!</h1>';
@@ -38,7 +39,7 @@ try {
         document.body.appendChild(div);
         const root = createRoot(div);
         root.render(<ActionPanel />);
-        console.log('done')
+        // console.log('done')
         // document.addEventListener('DOMContentLoaded', function () {
         //     console.log('invoked:' )
         //     var newDiv = document.createElement('div');
@@ -61,9 +62,36 @@ try {
         //         createTime: new Date(response * 1000),
         //         commentsLength: getFBCommitLength(),
         //     };
+        //     console.log('data:', data);
         //     sendMessage('hello-from-content-script', data, 'background');
         // });
+        window.addEventListener('DOMContentLoaded', function () {
+            // console.log('invoded:');
+            const fetch1 = getPostOwnerId();
+            const fetch2 = getCreationTime(1);
+            Promise.all([fetch1, fetch2]).then((response) => {
+                // const data = {
+                //     author: getAuthorFromClass(),
+                //     createTime: new Date(response * 1000),
+                //     commentsLength: getFBCommitLength(),
+                // };
+                console.log('response:', response);
 
+                // sendMessage('hello-from-content-script', data, 'background');
+            });
+        });
+        // const fetch1 = getPostOwnerId();
+        // const fetch2 = getCreationTime(1);
+        // Promise.all([fetch1, fetch2]).then((response) => {
+        //     // const data = {
+        //     //     author: getAuthorFromClass(),
+        //     //     createTime: new Date(response * 1000),
+        //     //     commentsLength: getFBCommitLength(),
+        //     // };
+        //     console.log('response:', response);
+
+        //     // sendMessage('hello-from-content-script', data, 'background');
+        // });
         // let node;
         // // while (!node) {
         // for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
@@ -95,7 +123,7 @@ try {
     console.log('error:', e);
 }
 
-async function switchContentState(node) {
+export async function switchContentState(node) {
     const commitstats = await getCommitSwitchNode(node);
     let textcontent = '';
     try {
@@ -119,13 +147,37 @@ async function switchContentState(node) {
 }
 
 function isFacebookPostUrl(url: string) {
-    console.log('url:', url);
     const regexPermalinkAndPost =
-    /^https:\/\/www\.facebook\.com\/groups\/(\d+)\/permalink\/(\d+)$/;
-    const regexPost =
-    /^https:\/\/www\.facebook\.com\/groups\/(\d+)\/posts\/(\d+)$/;
+        /^https:\/\/www\.facebook\.com\/groups\/[A-Za-z0-9_-]+\/permalink\/[0-9]+\/?$/;
+    const regexPost = /^https:\/\/www\.facebook\.com\/groups\/[A-Za-z0-9_-]+\/posts\/[0-9]+\/?$/;
+    const res = regexPermalinkAndPost.test(url) || regexPost.test(url);
+    console.log('url:', url, res);
+    return res;
+}
 
-    return regexPermalinkAndPost.test(url) || regexPost.test(url);
+//取得貼文者的Id
+export async function getPostOwnerId() {
+    let postOwnerId = '';
+    let postHeaderClass = document
+        .querySelector('body')
+        .querySelectorAll('div.xu06os2.x1ok221b a.x1i10hfl');
+    for (let i = 0; i < postHeaderClass.length; i++) {
+        if (postHeaderClass[i].href.search('user') != -1) {
+            postOwnerId = postHeaderClass[i].href.split('user')[1].split('/')[1];
+            break;
+        }
+    }
+
+    if (!postOwnerId) {
+        for (let i = 0; i < postHeaderClass.length; i++) {
+            if (postHeaderClass[i].href.search('profile.php?') != -1) {
+                postOwnerId = postHeaderClass[i].href.split('id=')[1].split('&__cft__')[0];
+                break;
+            }
+        }
+    }
+
+    return postOwnerId;
 }
 
 /**
@@ -133,7 +185,7 @@ function isFacebookPostUrl(url: string) {
  * @param {integer} funcType 使用的方法
  * @returns {Promise<string>} 時間字串
  */
-async function getCreationTime(funcType: number) {
+export async function getCreationTime(funcType: number) {
     let timeText = '';
     switch (funcType) {
         case 1:
@@ -145,7 +197,7 @@ async function getCreationTime(funcType: number) {
 }
 
 // 取得FB顯示留言長度
-function getFBCommitLength() {
+export function getFBCommitLength() {
     let commitClass;
     for (const postCommitDiv of classTable.postCommitDiv) {
         commitClass = document.querySelector('body').querySelector(postCommitDiv);
@@ -175,7 +227,7 @@ function getFBCommitLength() {
     return FBlength;
 }
 
-async function getCreationTimeByPostHtml() {
+export async function getCreationTimeByPostHtml() {
     let postHtml = await getPostHtml();
     if (postHtml && postHtml.indexOf('publish_time\\":') != -1) {
         return postHtml.split('publish_time\\":')[1].split(',')[0];
@@ -184,7 +236,7 @@ async function getCreationTimeByPostHtml() {
     return '';
 }
 
-async function getPostHtml() {
+export async function getPostHtml() {
     const config = {
         headers: {
             Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -204,19 +256,19 @@ async function getPostHtml() {
     return response;
 }
 
-function getAuthorFromClass() {
+export function getAuthorFromClass() {
     //不要異動到外層的author
     let classAuthor = {
         id: '',
         name: '',
     };
 
-    //作者的連結
-    // const author_link = document.querySelector('a[href="/me/"]')
-    // if(author_link) {
-    //   classAuthor.id = getUserID()
-    //   classAuthor.name = author_link.textContent
-    // }
+    // 作者的連結
+    const author_link = document.querySelector('a[href="/me/"]');
+    if (author_link) {
+        classAuthor.id = getUserID();
+        classAuthor.name = author_link.textContent;
+    }
     const scriptStringList = document.getElementsByTagName('script');
     let userInfo = getUserInfoSearchUserIDByScript(scriptStringList);
     classAuthor = userInfo;
@@ -233,12 +285,49 @@ function getAuthorFromClass() {
     return classAuthor;
 }
 
+export function getUserID() {
+    let userId = '';
+    try {
+        let str = '"USER_ID":"';
+        userId = getUserIDFromScript(getTargetDomFromDocumentScripts, str);
+    } catch (error) {}
+    return userId;
+}
+
+/**
+ *
+ * @param {function} domFetcher - 要從哪裡抓取字符
+ * @param {string} str - 要搜索的字
+ * @returns {string} - 返回找到的组ID
+ */
+export function getUserIDFromScript(domFetcher, str) {
+    let userId = '';
+    const firstScript = domFetcher(str);
+    if (firstScript) {
+        let start = firstScript.textContent.indexOf(str);
+        userId = firstScript.textContent.substr(start + str.length).split('"')[0];
+    }
+    return userId;
+}
+
+export function getTargetDomFromDocumentScripts(str) {
+    const documentScripts = document.querySelectorAll('script');
+
+    for (let i = 0; i < documentScripts.length; i++) {
+        let scriptDom = documentScripts[i];
+        let start = scriptDom.textContent.indexOf(str);
+        if (start !== -1) return scriptDom;
+    }
+
+    return '';
+}
+
 /**
  * - 取得切換留言排序的節點
  * @param {node} nodes - 搜尋的節點
  * @returns {node} - 切換留言的節點
  */
-function getCommitSwitchNode(nodes) {
+export function getCommitSwitchNode(nodes) {
     let commitstats = null;
     try {
         /*
@@ -263,7 +352,7 @@ function getCommitSwitchNode(nodes) {
     return commitstats;
 }
 
-function getUserInfoSearchUserIDByScript(scriptStringList) {
+export function getUserInfoSearchUserIDByScript(scriptStringList) {
     let userInfo = {
         id: '',
         name: '',
@@ -288,7 +377,7 @@ function getUserInfoSearchUserIDByScript(scriptStringList) {
 }
 
 //專門處理的方法
-function getAccountUsersByScriptStringList(scriptStringList) {
+export function getAccountUsersByScriptStringList(scriptStringList) {
     let author = {
         id: '',
         name: '',
@@ -313,7 +402,7 @@ function getAccountUsersByScriptStringList(scriptStringList) {
     return author;
 }
 
-function extractUserStringByAccountUser(scriptString) {
+export function extractUserStringByAccountUser(scriptString) {
     const userStringStart = scriptString.search('"account_user');
     const userStringEnd = scriptString.search('"extensions');
 
@@ -325,7 +414,7 @@ function extractUserStringByAccountUser(scriptString) {
     return null;
 }
 
-function getAccountUsersAtBottomUserByScriptStringList(scriptStringList) {
+export function getAccountUsersAtBottomUserByScriptStringList(scriptStringList) {
     let author = {
         id: '',
         name: '',
@@ -343,7 +432,7 @@ function getAccountUsersAtBottomUserByScriptStringList(scriptStringList) {
     return author;
 }
 
-function extractUserStringByBottomUser(scriptString) {
+export function extractUserStringByBottomUser(scriptString) {
     const userStringStart = scriptString.search('&__user=');
     const userStringEnd = scriptString.search('&__comet_req=');
 
@@ -356,7 +445,7 @@ function extractUserStringByBottomUser(scriptString) {
     return null;
 }
 
-function fetchCommentsList(node) {
+export function fetchCommentsList(node) {
     // var unorderedList = nodes.querySelector('ul:not([class])');
     if (!node) {
         return;
@@ -419,13 +508,13 @@ function fetchCommentsList(node) {
     }
 }
 
-async function wait(ms) {
+export async function wait(ms) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
     });
 }
 
-async function check(node, resolve) {
+export async function check(node, resolve) {
     await wait(1000);
 
     // //if (is_load) return;
@@ -473,7 +562,7 @@ async function check(node, resolve) {
 
 // 檢查是否還有更多留言按鈕。
 // 回傳true 表示點擊按鈕，畫面可能會變動。
-function clickcheckMore(nodes) {
+export function clickcheckMore(nodes) {
     //留言內的點擊更多的CSS
     /*
     /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div[4]/div/div/div/div/div/div/div[1]/div/div/div/div/div/div/div/div/div/div/div[8]/div/div[4]/div/div/div[2]/div[2]/div[1]/div[2]/span/span
@@ -534,7 +623,7 @@ function clickcheckMore(nodes) {
 
 // 檢查是否還有更多留言按鈕。
 // 回傳true 表示點擊按鈕，畫面可能會變動。
-function clickMoreCommit(nodes) {
+export function clickMoreCommit(nodes) {
     if (!nodes) {
         //等待檢查是否會有空值情況發生
         return false;
@@ -592,7 +681,7 @@ function clickMoreCommit(nodes) {
  * @param {integer} funcType - 使用方法
  * @returns {node} - 返回找到的btn節點
  */
-function getCommitSortListBtn(funcType) {
+export function getCommitSortListBtn(funcType) {
     let selectCommitShowNewBtn = null;
     switch (funcType) {
         case 1:
@@ -609,7 +698,7 @@ function getCommitSortListBtn(funcType) {
  * @param {function} nodeFetcher - 注入選擇節點的方法
  * @returns {node} 返回目標btn Node
  */
-function getCommitSwitchBtn(nodeFetcher) {
+export function getCommitSwitchBtn(nodeFetcher) {
     /*
     /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[2]/div/div/div[1]/div[1]/div/div/div[1]/div/div/div/div[1]/div/div[1]
     */
@@ -637,7 +726,7 @@ function getCommitSwitchBtn(nodeFetcher) {
 }
 
 //commitSortList 是找出他是找出他切換留言顯示方式的框框
-function getCommitSortListNode() {
+export function getCommitSortListNode() {
     /*
     /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[2]/div/div/div[1]
     */
@@ -655,7 +744,7 @@ function getCommitSortListNode() {
 }
 
 //取得留言者者id與綽號
-function getCommenterIdAndNicknameFromNameUrl(fbNameUrl) {
+export function getCommenterIdAndNicknameFromNameUrl(fbNameUrl) {
     let commenter = {
         id: '',
         nickname: '',
@@ -673,7 +762,7 @@ function getCommenterIdAndNicknameFromNameUrl(fbNameUrl) {
 }
 
 //從留言的node中找出留言內容的區塊
-function getCommentMsgNodeByCommitCommentNode(commitCommentNode) {
+export function getCommentMsgNodeByCommitCommentNode(commitCommentNode) {
     let textNode = null;
     for (let i = 0; i < classTable.postCommitContent.length; i++) {
         const element = classTable.postCommitContent[i];
@@ -685,7 +774,7 @@ function getCommentMsgNodeByCommitCommentNode(commitCommentNode) {
 }
 
 //從留言的時間超連結找出留言url
-function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
+export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
     let commentUrl = '';
     //找留言時間的dom
     let tmpPostTime = null;
@@ -711,7 +800,7 @@ function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
  * @param {*} commentNode - 使用者留言的節點
  * @returns {node} - 排除使用者頭像更精準的留言節點
  */
-function getCommitCommentNode(funcType, commentNode) {
+export function getCommitCommentNode(funcType, commentNode) {
     let commitCommentNode = null;
     switch (funcType) {
         case 1:
@@ -722,7 +811,7 @@ function getCommitCommentNode(funcType, commentNode) {
 }
 
 //取得留言區塊排除頭像
-function getCommmitCommentNodeByCommentNode(commentNode) {
+export function getCommmitCommentNodeByCommentNode(commentNode) {
     let commitCommentNode = null;
     for (let i = 0; i < classTable.postCommitNode.length; i++) {
         const nodeClass = classTable.postCommitNode[i];
@@ -738,7 +827,7 @@ function getCommmitCommentNodeByCommentNode(commentNode) {
  * @param {object} postDataComments - 留言物件push
  * @returns
  */
-function fetchChildCommentListByCommentNode(commentNode, postDataComments) {
+export function fetchChildCommentListByCommentNode(commentNode, postDataComments) {
     for (let i = 0; i < classTable.oneCommentClass.length; i++) {
         let oneCommentClass = classTable.oneCommentClass[i];
         let oneCommentByCommentNode = commentNode.querySelector(oneCommentClass);
@@ -755,7 +844,7 @@ function fetchChildCommentListByCommentNode(commentNode, postDataComments) {
 }
 
 //處理第一層下的所有回覆
-function fetchUnderOneCommentsListByCommentNode(commentNode, postDataComments) {
+export function fetchUnderOneCommentsListByCommentNode(commentNode, postDataComments) {
     if (commentNode.childNodes[1].childNodes.length > 0) {
         let fetchData = {
             node: commentNode.childNodes[1],
@@ -767,7 +856,7 @@ function fetchUnderOneCommentsListByCommentNode(commentNode, postDataComments) {
 }
 
 //處理第二層下的所有回覆
-function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments) {
+export function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments) {
     let allSecondComment = [];
     let querySelect = '.x78zum5 .xdt5ytf';
     // let querySelect = ".x1n2onr6 .x1xb5h2r"  //他是子層不能同時query喔！會重複抓取
@@ -795,7 +884,7 @@ function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments
  * @param {node} commitCommentNode - 注入節點
  * @returns {string} - 留言者名稱
  */
-function getCommenterName(funcType, commitCommentNode) {
+export function getCommenterName(funcType, commitCommentNode) {
     let commenterName = '';
     switch (funcType) {
         case 1:
@@ -805,7 +894,7 @@ function getCommenterName(funcType, commitCommentNode) {
     return commenterName;
 }
 
-function getCommenterNameByMsgClassCommitNode(commitCommentNode) {
+export function getCommenterNameByMsgClassCommitNode(commitCommentNode) {
     let commenterName = '';
 
     for (let i = 0; i < classTable.pageMsgName.length; i++) {
@@ -828,7 +917,7 @@ function getCommenterNameByMsgClassCommitNode(commitCommentNode) {
  * @param {node} commitCommentNode - 注入節點
  * @returns {string} - 訊息
  */
-function getCommentMessage(funcType, commitCommentNode) {
+export function getCommentMessage(funcType, commitCommentNode) {
     let message = '';
     switch (funcType) {
         case 1:
@@ -847,7 +936,7 @@ function getCommentMessage(funcType, commitCommentNode) {
  * @param {node} commitCommentNode - 注入節點
  * @returns {string} - 留言內容
  */
-function getMessageByMessageNode(msgFetcher, commitCommentNode) {
+export function getMessageByMessageNode(msgFetcher, commitCommentNode) {
     let message = '';
     let messageNode = msgFetcher(commitCommentNode);
     if (messageNode) {
@@ -864,7 +953,7 @@ function getMessageByMessageNode(msgFetcher, commitCommentNode) {
  * @param {string} fbNameUrl - 注入節點
  * @returns {obj} - 留言者的id，小名
  */
-function getCommentInfoObj(funcType, fbNameUrl) {
+export function getCommentInfoObj(funcType, fbNameUrl) {
     let commenter = {
         id: '',
         nickname: '',
@@ -885,7 +974,7 @@ function getCommentInfoObj(funcType, fbNameUrl) {
  * @param {node} commentNode - 注入節點
  * @returns {string} - 留言的a_link
  */
-function getCommentUrl(funcType, commentNode) {
+export function getCommentUrl(funcType, commentNode) {
     let commentUrl = '';
     switch (funcType) {
         case 1:
@@ -901,7 +990,7 @@ function getCommentUrl(funcType, commentNode) {
  * @param {string} commentUrl - 留言的url
  * @returns {string}
  */
-function getCommentId(funcType, commentUrl) {
+export function getCommentId(funcType, commentUrl) {
     let id = '';
     switch (funcType) {
         case 1:
@@ -911,7 +1000,7 @@ function getCommentId(funcType, commentUrl) {
     return id;
 }
 
-function getCommentIdByUrlSplitWord(url) {
+export function getCommentIdByUrlSplitWord(url) {
     let id;
     if (url.indexOf('?comment_id=') !== -1) {
         id = url.split('?comment_id=')[1].split('&')[0];
@@ -924,7 +1013,7 @@ function getCommentIdByUrlSplitWord(url) {
  * @param {object} fetchData - 節點物件跟留言內容的籃子
  * @returns
  */
-function fetchByCommentsListNode(fetchData) {
+export function fetchByCommentsListNode(fetchData) {
     let commentsListNode = fetchData.childNodes;
     commentsListNode.forEach((commentNode) => {
         console.log('commentNode:', commentNode);
@@ -936,7 +1025,7 @@ function fetchByCommentsListNode(fetchData) {
  * @param {node} commitCommentNode - 注入節點
  * @returns
  */
-function findImageUrl(node) {
+export function findImageUrl(node) {
     // Locate the element that contains the image URL using its class or other distinctive attributes
     const imageElement = node.querySelector(
         'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xa49m3k.xqeqjp1.x2hbi6w.x13fuv20.xu3j5b3.x1q0q8m5.x26u7qi.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xdl72j9.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1a2a7pz',
