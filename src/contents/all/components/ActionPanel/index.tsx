@@ -1,62 +1,35 @@
 import React, { useState } from 'react';
 import { Typography, Button } from 'antd';
 import {
-    getPostOwnerId,
+    getPostOwner,
     getCreationTime,
     getFBCommitLength,
-    getAuthorFromClass,
-    getHeader,
-    getGroupNameClass,
     getPostNumInfo,
-    getContentFn,
     getTargetPostClassFromDocumentBody,
     getGroupID,
-    getFbGroupId,
-    getfbPostNum,
 } from '../../../all/index';
-import e from 'cors';
 const { Title } = Typography;
 
 const ActionPanel = () => {
     const [loadings, setLoadings] = useState<boolean>(false);
 
     function getPostDetail() {
-        // post text console.log('getHeader:', getContentFn().trim());
-        // post number and url getPostNumInfo(1).then((res) => {
-        //     console.log('getPostNumInfo:', res);
-        // });
-        getPostNumInfo(1).then((res) => {
-            console.log('getPostNumInfo:', res);
-        });
-        getGroupNameClass().then((res) => {
-            console.log('getGroupNameClass:', res);
-        });
-        console.log(
-            'getHeader1:',
-            // getHeader(1),
-            // getTargetPostClassFromDocumentBody(),
-            // getGroupNameClass(),
-            getFbGroupId(1),
-            // getGroupID(),
-        );
-        console.log(
-            'getHeader2:',
-            // getHeader(1),
-            // getTargetPostClassFromDocumentBody(),
-            // getGroupNameClass(),
-            // getFbGroupId(1),
-            getGroupID(),
-            getfbPostNum(1),
-        );
-        const fetch1 = getPostOwnerId();
-        const fetch2 = getCreationTime(1);
-        Promise.all([fetch1, fetch2])
+        console.log('getHeader:', getTargetPostClassFromDocumentBody());
+
+        const fetchPostNumInfo = getPostNumInfo(1);
+        const fetchPostOwner = getPostOwner();
+        const fetchCreationTime = getCreationTime(1);
+        Promise.all([fetchPostNumInfo, fetchPostOwner, fetchCreationTime])
             .then((response) => {
                 const data = {
-                    author: getAuthorFromClass(),
-                    authorId: response[0],
-                    createTime: new Date((response[1] as number) * 1000),
+                    group: {
+                        name: '',
+                        id: getGroupID(),
+                    },
+                    author: response[1],
+                    createTime: new Date((response[2] as number) * 1000),
                     commentsLength: getFBCommitLength(),
+                    post: response[0],
                 };
                 console.log('data:', data);
 

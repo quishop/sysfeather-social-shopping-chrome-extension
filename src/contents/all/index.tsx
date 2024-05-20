@@ -11,7 +11,6 @@ import { htmlTable } from './HtmlTable';
 try {
     if (isFacebookPostUrl(window.location.href)) {
         console.log('render2');
-        console.log('getTargetPostClassFromDocumentBody():', getTargetPostClassFromDocumentBody());
         // let div = document.createElement('div');
         // div.id = 'myCustomUI';
         // div.innerHTML = '<h1>Hello, this is my custom UI!</h1>';
@@ -156,11 +155,13 @@ function isFacebookPostUrl(url: string) {
 }
 
 //取得貼文者的Id
-export async function getPostOwnerId() {
+export async function getPostOwner() {
     let postOwnerId = '';
-    let postHeaderClass = document
-        .querySelector('body')
-        .querySelectorAll('div.xu06os2.x1ok221b a.x1i10hfl');
+    // let postHeaderClass = document
+    //     .querySelector('body')
+    //     .querySelectorAll('div.xu06os2.x1ok221b a.x1i10hfl');
+    const targetElement = getTargetPostClassFromDocumentBody()[0];
+    let postHeaderClass = targetElement.querySelectorAll('div.xu06os2.x1ok221b a.x1i10hfl');
     for (let i = 0; i < postHeaderClass.length; i++) {
         if (postHeaderClass[i].href.search('user') != -1) {
             postOwnerId = postHeaderClass[i].href.split('user')[1].split('/')[1];
@@ -176,8 +177,11 @@ export async function getPostOwnerId() {
             }
         }
     }
+    let postOwnerName = targetElement.querySelector(
+        'a.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1sur9pj.xkrqix3.xzsf02u.x1s688f',
+    );
 
-    return postOwnerId;
+    return { name: postOwnerName ? postOwnerName.textContent : '', id: postOwnerId };
 }
 
 /**
@@ -1191,6 +1195,7 @@ export async function getPostNumInfo(funcType) {
     let fbPostInfo = {
         url: '',
         num: '',
+        text: '',
     };
 
     switch (funcType) {
@@ -1206,7 +1211,7 @@ export async function getPostNumInfo(funcType) {
     }
 
     fbPostInfo = fixedPostInfo(fbPostInfo);
-
+    fbPostInfo.text = getContentFn().trim();
     return fbPostInfo;
 }
 
@@ -1291,7 +1296,6 @@ export const content = (selector) => {
     const targetNode = getTargetPostClassFromDocumentBody()[0].parentNode.parentNode;
     if (targetNode) {
         let contentNodes = targetNode.childNodes[2].querySelector(selector);
-        console.log('contentNodes:', targetNode.childNodes[2], contentNodes);
     }
     return getContentText(targetNode.childNodes[2]);
     //  return getContentText(contentNodes);
@@ -1301,7 +1305,6 @@ export const getContentFn = () => {
     for (let i = 0; i < classTable.postContent.length; i++) {
         let contentElement = classTable.postContent[i];
         const text = content(contentElement);
-        console.log('text:', text, contentElement);
         if (text && text.trim() != '點擊可標註商品') {
             return text;
         }
