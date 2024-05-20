@@ -38,84 +38,6 @@ try {
         document.body.appendChild(div);
         const root = createRoot(div);
         root.render(<ActionPanel />);
-        // console.log('done')
-        // document.addEventListener('DOMContentLoaded', function () {
-        //     console.log('invoked:' )
-        //     var newDiv = document.createElement('div');
-        //     newDiv.id = 'myCustomDiv';
-        //     newDiv.textContent = 'This is a custom div added by my Chrome Extension!';
-        //     newDiv.style.position = 'fixed';
-        //     newDiv.style.bottom = '20px';
-        //     newDiv.style.right = '20px';
-        //     newDiv.style.backgroundColor = 'white';
-        //     newDiv.style.border = '1px solid black';
-        //     newDiv.style.padding = '10px';
-        //     newDiv.style.zIndex = '1000';
-        //     document.body.appendChild(newDiv);
-        // });
-
-        // // sendMessage('hello-from-content-script', '123', 'background');
-        // getCreationTime(1).then((response) => {
-        //     const data = {
-        //         author: getAuthorFromClass(),
-        //         createTime: new Date(response * 1000),
-        //         commentsLength: getFBCommitLength(),
-        //     };
-        //     console.log('data:', data);
-        //     sendMessage('hello-from-content-script', data, 'background');
-        // });
-        window.addEventListener('DOMContentLoaded', function () {
-            // console.log('invoded:');
-            const fetch1 = getPostOwnerId();
-            const fetch2 = getCreationTime(1);
-            Promise.all([fetch1, fetch2]).then((response) => {
-                // const data = {
-                //     author: getAuthorFromClass(),
-                //     createTime: new Date(response * 1000),
-                //     commentsLength: getFBCommitLength(),
-                // };
-                console.log('response:', response);
-
-                // sendMessage('hello-from-content-script', data, 'background');
-            });
-        });
-        // const fetch1 = getPostOwnerId();
-        // const fetch2 = getCreationTime(1);
-        // Promise.all([fetch1, fetch2]).then((response) => {
-        //     // const data = {
-        //     //     author: getAuthorFromClass(),
-        //     //     createTime: new Date(response * 1000),
-        //     //     commentsLength: getFBCommitLength(),
-        //     // };
-        //     console.log('response:', response);
-
-        //     // sendMessage('hello-from-content-script', data, 'background');
-        // });
-        // let node;
-        // // while (!node) {
-        // for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
-        //     const pagePostCommitDiv = document
-        //         .querySelector('body')
-        //         .querySelector(pagePostCommitClass);
-        //     if (pagePostCommitDiv) {
-        //         node = pagePostCommitDiv;
-        //         break;
-        //     }
-        // }
-        // fetchCommentsList(node);
-
-        // console.log('SwitchNode:', getCommitSwitchNode(node));
-        // switchContentState(node);
-        // for (const postCommitDiv of classTable.postCommitDiv) {
-        //     const commitClass = document.querySelector('body').querySelector(postCommitDiv);
-        //     if (commitClass) {
-        //         this.postCommit = commitClass;
-        //         break;
-        //     }
-        // }
-        // const val = startFetchCommitComments(document.querySelector('body'), []);
-        // console.log('test 123:', val);
-        // console.log('test 123:', getContentFn());
     }
 } catch (e) {
     console.log('error');
@@ -157,9 +79,7 @@ function isFacebookPostUrl(url: string) {
 //取得貼文者的Id
 export async function getPostOwner() {
     let postOwnerId = '';
-    // let postHeaderClass = document
-    //     .querySelector('body')
-    //     .querySelectorAll('div.xu06os2.x1ok221b a.x1i10hfl');
+
     const targetElement = getTargetPostClassFromDocumentBody()[0];
     let postHeaderClass = targetElement.querySelectorAll('div.xu06os2.x1ok221b a.x1i10hfl');
     for (let i = 0; i < postHeaderClass.length; i++) {
@@ -203,8 +123,9 @@ export async function getCreationTime(funcType: number) {
 // 取得FB顯示留言長度
 export function getFBCommitLength() {
     let commitClass;
+    const targetElement = getTargetPostClassFromDocumentBody()[0];
     for (const postCommitDiv of classTable.postCommitDiv) {
-        commitClass = document.querySelector('body').querySelector(postCommitDiv);
+        commitClass = targetElement.parentNode.parentNode.querySelector(postCommitDiv);
         if (commitClass) {
             break;
         }
@@ -499,7 +420,26 @@ export function extractUserStringByBottomUser(scriptString) {
     return null;
 }
 
-export function fetchCommentsList(node) {
+export async function fetchComments() {
+    const targetElement = getTargetPostClassFromDocumentBody()[0];
+    // let node = document.querySelector('body'); // this.postHeader
+    let target = targetElement.parentNode.parentNode; // this.postHeader
+    let node;
+    while (!node) {
+        for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
+            const pagePostCommitDiv = target.querySelector(pagePostCommitClass);
+            if (pagePostCommitDiv) {
+                node = pagePostCommitDiv;
+                break;
+            }
+        }
+    }
+    const comments = await fetchCommentsList(node);
+    console.log('comments:', comments);
+    if (comments) return comments;
+}
+
+export async function fetchCommentsList(node) {
     // var unorderedList = nodes.querySelector('ul:not([class])');
     if (!node) {
         return;
@@ -517,48 +457,48 @@ export function fetchCommentsList(node) {
             }
         }
     }
-    console.log('unorderedList:', unorderedList);
 
     let oneComments = '';
-    const res = [];
+    const res: any[] = [];
     for (const OneCommentDiv of classTable.OneCommentDiv) {
         oneComments = unorderedList.querySelectorAll('div' + OneCommentDiv);
         if (oneComments) {
             break;
         }
     }
-    console.log('oneComments:', oneComments);
 
     if (oneComments) {
-        const res = [];
+        let curCommentsList = [];
 
         oneComments.forEach((item, index) => {
-            if (
-                item.classList.contains('x78zum5') &&
-                item.classList.contains('xdt5ytf') &&
-                item.classList.length === 2
-            ) {
-                res.push(item);
-
-                // get comment message
-                // console.log('message:', getCommentMessage(1, item));
-                // get commit url and id
-                // console.log('commitId', getCommentId(1, getCommentUrlFromCommentTimeByCommentNode(item)));
-                // getCommentMsgNodeByCommitCommentNode(node);
-                // getCommenterName
-                // console.log('commenterName:', getCommenterName(1, item));
-                // name url
-                // let fbNameUrl = item.querySelector('a').href;
-                // console.log('fbNameUrl:', fbNameUrl, getCommentInfoObj(1, fbNameUrl));
-                // getCommentUrl
-                // console.log('commentUrl:', getCommentUrl(1, item));
-                // getCommenterAvata
-                // console.log('item', item, findImageUrl(item));
-            }
+            curCommentsList.push(item);
         });
-        console.log('res:', res);
-        // fetchByCommentsListNode(oneComments);
-        check(node, null);
+        const hasMore = await check(node, null);
+        if (hasMore) {
+            return fetchCommentsList(node);
+        } else {
+            curCommentsList = curCommentsList.filter(
+                (item) =>
+                    item.classList.contains('x78zum5') &&
+                    item.classList.contains('xdt5ytf') &&
+                    item.classList.length === 2,
+            );
+            curCommentsList.forEach((item, index) => {
+                let fbNameUrl = item.querySelector('a').href;
+
+                const comment = {
+                    message: getCommentMessage(1, item),
+                    id: getCommentId(1, getCommentUrlFromCommentTimeByCommentNode(item)),
+                    author: {
+                        name: getCommenterName(1, item),
+                        id: getCommentInfoObj(1, fbNameUrl).id,
+                        avata: findImageUrl(item),
+                    },
+                };
+                res.push(comment);
+            });
+            return res;
+        }
     }
 }
 
@@ -588,10 +528,11 @@ export async function check(node, resolve) {
     if (checkMoreStatus && checkMoreStatus == clickMoreStatus) {
         //找留言列表準備抓留言內容
         //if (is_load) return;
-        console.log('invokeds');
         await wait(2000);
-        fetchCommentsList(node);
+        return true;
+        // fetchCommentsList(node);
     }
+    return false;
 
     // // 留言數量超過STOP_COMMENT_LENGTH 就匯入更新貼文
     // if (len >= STOP_COMMENT_LENGTH) {
@@ -823,7 +764,7 @@ export function getCommentMsgNodeByCommitCommentNode(commitCommentNode) {
         textNode = commitCommentNode.querySelector(element);
         if (textNode) break;
     }
-    console.log('textNode:', textNode);
+
     return textNode;
 }
 
@@ -1127,7 +1068,9 @@ function getPostUrlFromComment() {
 
 // 取得貼文header
 export function getHeader(i) {
-    let node = document.querySelector('body'); // this.postHeader
+    const targetElement = getTargetPostClassFromDocumentBody()[0];
+    // let node = document.querySelector('body'); // this.postHeader
+    let node = targetElement.parentNode.parentNode; // this.postHeader
     let header = '';
     /*
     貼文人姓名的超連結
@@ -1351,7 +1294,7 @@ function getTargetFromClassTablePost(targetNode) {
         target = targetNode.querySelectorAll(classTable.postClass[i]);
         if (target.length > 0) break;
     }
-    console.log('target:', target);
+
     return target;
 }
 

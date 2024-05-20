@@ -5,8 +5,8 @@ import {
     getCreationTime,
     getFBCommitLength,
     getPostNumInfo,
-    getTargetPostClassFromDocumentBody,
     getGroupID,
+    fetchComments,
 } from '../../../all/index';
 const { Title } = Typography;
 
@@ -14,12 +14,11 @@ const ActionPanel = () => {
     const [loadings, setLoadings] = useState<boolean>(false);
 
     function getPostDetail() {
-        console.log('getHeader:', getTargetPostClassFromDocumentBody());
-
         const fetchPostNumInfo = getPostNumInfo(1);
         const fetchPostOwner = getPostOwner();
         const fetchCreationTime = getCreationTime(1);
-        Promise.all([fetchPostNumInfo, fetchPostOwner, fetchCreationTime])
+        const fetchCommentList = fetchComments();
+        Promise.all([fetchPostNumInfo, fetchPostOwner, fetchCreationTime, fetchCommentList])
             .then((response) => {
                 const data = {
                     group: {
@@ -30,6 +29,7 @@ const ActionPanel = () => {
                     createTime: new Date((response[2] as number) * 1000),
                     commentsLength: getFBCommitLength(),
                     post: response[0],
+                    comments: response[3],
                 };
                 console.log('data:', data);
 
@@ -37,6 +37,11 @@ const ActionPanel = () => {
             })
             .catch((e) => {
                 console.log('error:', e);
+            })
+            .finally(() => {
+                {
+                    setLoadings(false);
+                }
             });
     }
 
@@ -63,7 +68,7 @@ const ActionPanel = () => {
                         setLoadings(true);
                     }}
                 >
-                    開始
+                    {loadings ? '獲取中' : '開始'}
                 </Button>
             </div>
         </div>
