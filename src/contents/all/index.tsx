@@ -294,6 +294,56 @@ export function getUserID() {
     return userId;
 }
 
+function getGroupIDFromMeta(str) {
+    let groupId = '';
+    const documentScripts = document.getElementsByTagName('meta');
+    for (let i = 0; i < documentScripts.length; i++) {
+        if (documentScripts[i].getAttribute('property') == 'al:android:url') {
+            groupId = documentScripts[i].getAttribute('content').replace('fb://group/', '');
+            break;
+        }
+    }
+    return groupId;
+}
+
+export function getGroupID() {
+    let groupId = '';
+    const searchStrings = ["{'groupID':'", '"groupID":"'];
+    try {
+        for (const str of searchStrings) {
+            if (groupId) {
+                break;
+            }
+            groupId = getGroupIDFromScript(getTargetDomFromDocumentScripts, str);
+            if (!groupId) {
+                groupId = getGroupIDFromMeta(str);
+            }
+        }
+    } catch (error) {
+        console.error(error);
+    }
+    return groupId;
+}
+
+/**
+ *
+ * @param {function} domFetcher - 要從哪裡抓取字符
+ * @param {string} str - 要搜索的字。
+ * @returns {string} - 返回找到的组ID
+ */
+function getGroupIDFromScript(domFetcher, str) {
+    let id = '';
+
+    const firstScript = domFetcher(str);
+
+    if (firstScript) {
+        let start = firstScript.textContent.indexOf(str);
+        id = firstScript.textContent.substr(start + str.length).split('"')[0];
+    }
+
+    return id;
+}
+
 /**
  *
  * @param {function} domFetcher - 要從哪裡抓取字符
@@ -1300,4 +1350,71 @@ function getTargetFromClassTablePost(targetNode) {
     }
     console.log('target:', target);
     return target;
+}
+
+/**
+ * - 取得社團ID
+ * @param {string} funcType - 使用的方法
+ * @returns {string} - 返回id
+ */
+export function getFbGroupId(funcType) {
+    let groupId = null;
+    switch (funcType) {
+        case 1:
+            groupId = getGroupIDByStrReplace();
+        default:
+            break;
+    }
+    console.log('getFbGroupId:', groupId);
+    return groupId;
+}
+
+function getGroupIDByStrReplace() {
+    const groupStr = getGroupContentFromAndroidUrl();
+    const fbGroupId = groupStr.replace('fb://group/', '');
+    return fbGroupId;
+}
+
+function getGroupContentFromAndroidUrl() {
+    const metas = document.getElementsByTagName('meta');
+    for (let i = 0; i < metas.length; i++) {
+        if (metas[i].getAttribute('property') == 'al:android:url') {
+            let group = metas[i].getAttribute('content');
+            if (group) return group;
+        }
+    }
+    return '';
+}
+
+/**
+ *
+ * @param {string} funcType - 使用的方法
+ * @returns {string} - 返回id
+ */
+export function getfbPostNum(funcType) {
+    let fbPostNum = null;
+    switch (funcType) {
+        case 1:
+            fbPostNum = getfbPostNumFromPostUrl();
+        default:
+            break;
+    }
+    return fbPostNum;
+}
+
+function getfbPostNumFromPostUrl() {
+    let fbPostNum = '';
+    let fbPostUrl = window.location.toString();
+    if (fbPostUrl) {
+        if (fbPostUrl.indexOf('posts/') != -1) {
+            fbPostNum = fbPostUrl.split('posts/')[1].split('/')[0];
+        } else if (fbPostUrl.indexOf('permalink/') != -1) {
+            fbPostNum = fbPostUrl.split('permalink/')[1].split('/')[0];
+        }
+
+        if (fbPostNum.indexOf('?comment_id') != -1) {
+            fbPostNum = fbPostNum.split('?comment_id')[0];
+        }
+    }
+    return fbPostNum;
 }

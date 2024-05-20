@@ -10,6 +10,9 @@ import {
     getPostNumInfo,
     getContentFn,
     getTargetPostClassFromDocumentBody,
+    getGroupID,
+    getFbGroupId,
+    getfbPostNum,
 } from '../../../all/index';
 import e from 'cors';
 const { Title } = Typography;
@@ -18,27 +21,50 @@ const ActionPanel = () => {
     const [loadings, setLoadings] = useState<boolean>(false);
 
     function getPostDetail() {
-        console.log('getHeader:', getContentFn().trim());
-        // getPostNumInfo(1).then((res) => {
+        // post text console.log('getHeader:', getContentFn().trim());
+        // post number and url getPostNumInfo(1).then((res) => {
         //     console.log('getPostNumInfo:', res);
         // });
-        // const fetch1 = getPostOwnerId();
-        // const fetch2 = getCreationTime(1);
-        // Promise.all([fetch1, fetch2])
-        //     .then((response) => {
-        //         const data = {
-        //             author: getAuthorFromClass(),
-        //             authorId: response[0],
-        //             createTime: new Date((response[1] as number) * 1000),
-        //             commentsLength: getFBCommitLength(),
-        //         };
-        //         console.log('data:', data);
+        getPostNumInfo(1).then((res) => {
+            console.log('getPostNumInfo:', res);
+        });
+        getGroupNameClass().then((res) => {
+            console.log('getGroupNameClass:', res);
+        });
+        console.log(
+            'getHeader1:',
+            // getHeader(1),
+            // getTargetPostClassFromDocumentBody(),
+            // getGroupNameClass(),
+            getFbGroupId(1),
+            // getGroupID(),
+        );
+        console.log(
+            'getHeader2:',
+            // getHeader(1),
+            // getTargetPostClassFromDocumentBody(),
+            // getGroupNameClass(),
+            // getFbGroupId(1),
+            getGroupID(),
+            getfbPostNum(1),
+        );
+        const fetch1 = getPostOwnerId();
+        const fetch2 = getCreationTime(1);
+        Promise.all([fetch1, fetch2])
+            .then((response) => {
+                const data = {
+                    author: getAuthorFromClass(),
+                    authorId: response[0],
+                    createTime: new Date((response[1] as number) * 1000),
+                    commentsLength: getFBCommitLength(),
+                };
+                console.log('data:', data);
 
-        //         // sendMessage('hello-from-content-script', data, 'background');
-        //     })
-        //     .catch((e) => {
-        //         console.log('error:', e);
-        //     });
+                // sendMessage('hello-from-content-script', data, 'background');
+            })
+            .catch((e) => {
+                console.log('error:', e);
+            });
     }
 
     return (
