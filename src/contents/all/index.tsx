@@ -38,6 +38,7 @@ try {
         document.body.appendChild(div);
         const root = createRoot(div);
         root.render(<ActionPanel />);
+
     }
 } catch (e) {
     console.log('error');

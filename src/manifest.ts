@@ -9,7 +9,7 @@ const manifest: Manifest.WebExtensionManifest = {
     description: pkg.description,
     manifest_version: 3,
     minimum_chrome_version: pkg.browserslist.split(' ')[2],
-    permissions: ['activeTab', 'declarativeContent', 'storage', 'scripting', 'webRequest'],
+    permissions: ['tabs', 'activeTab', 'declarativeContent', 'storage', 'scripting', 'webRequest'],
     host_permissions: ['https://www.facebook.com/*'],
     content_security_policy: {
         extension_pages: "script-src 'self' http://localhost; object-src 'self';",
@@ -22,6 +22,10 @@ const manifest: Manifest.WebExtensionManifest = {
         {
             resources: ['js/content.js'],
             matches: ['https://www.facebook.com/*'],
+        },
+        {
+            resources: ['js/options.js'],
+            matches: ['chrome://newtab/*'],
         },
     ],
     background: {
@@ -44,7 +48,7 @@ const manifest: Manifest.WebExtensionManifest = {
             js: ['js/all.js', ...(__DEV__ ? [] : ['js/all.js'])],
             all_frames: true,
             run_at: 'document_end',
-        //    "run_at": "document_start"
+            //    "run_at": "document_start"
         },
         // {
         //     css: ['css/all.css'],

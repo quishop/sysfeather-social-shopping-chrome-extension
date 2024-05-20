@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Typography, Button } from 'antd';
+import { sendMessage } from 'webext-bridge';
 import {
     getPostOwner,
     getCreationTime,
@@ -32,8 +33,11 @@ const ActionPanel = () => {
                     comments: response[3],
                 };
                 console.log('data:', data);
-
-                // sendMessage('hello-from-content-script', data, 'background');
+                chrome.runtime.sendMessage({ action: 'sendData', data: data }, (response) => {
+                    console.log('sendData:0', response.status);
+                }); 
+                console.log('invoked send')
+                // sendMessage('hello-from-content-script', JSON.stringify(data), 'background');
             })
             .catch((e) => {
                 console.log('error:', e);
