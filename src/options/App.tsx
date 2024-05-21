@@ -17,9 +17,9 @@ const App = () => {
     }, []);
 
     return (
-        <div className="app" style={{paddingTop:'10px'}}>
+        <div className="app" style={{ paddingTop: '10px' }}>
             {contextHolder}
-            <Paragraph style={{textAlign:'center'}}>
+            <Paragraph style={{ textAlign: 'center' }}>
                 <Title level={2}>貼文內容</Title>
             </Paragraph>
             {data && (
