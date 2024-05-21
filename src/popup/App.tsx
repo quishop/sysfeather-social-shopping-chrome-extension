@@ -1,37 +1,39 @@
+import { Avatar, Layout, List, Space, Typography } from 'antd';
+
 import './App.scss';
-// import { classTable } from './ClassTable';
-import { useEffect } from 'react';
+
+const { Header, Content } = Layout;
+const { Title, Paragraph } = Typography;
+
+const data = [
+    'https://www.facebook.com/groups/{社團名稱/ID}/permalink/{貼文ID}/',
+    'https://www.facebook.com/groups/{社團名稱/ID}/posts/{貼文ID}/',
+];
+
 const App = () => {
-    useEffect(() => {
-        // getGroupNameClass();
-    }, []);
-
-    // async function getGroupNameClass() {
-    //     // let groupName = null;
-    //     // //取社團名稱(用社團名稱超連結的CSS)
-    //     // /*
-    //     // /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div[1]/div[2]/div/div/div/div/div[1]/div/div/div/div[1]/div/div[1]/h1/span/a
-    //     // */
-
-    //     // for (let i = 0; i < classTable.group_name.length; i++) {
-    //     //     const groupNameNode = classTable.group_name[i];
-    //     //     console.log('groupNameNode:', classTable.group_name);
-    //     //     groupName = document.querySelector(groupNameNode);
-    //     //     if (groupName) break;
-    //     // }
-    //     // console.log('invoked getGroupNameClass: ', groupName);
-    //     const className =
-    //         'x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1heor9g xt0b8zv x1xlr1w8';
-    //     const elements = document.querySelectorAll(`.${className.replace(/ /g, '.')}`);
-
-    //     console.log('elements:', elements.length ? elements[0].innerHTML : '');
-
-    //     return elements.length ? elements[0].innerHTML : '';
-    // }
-
     return (
         <div className="app">
-            <h1 className="title">popup page</h1>
+            <Layout style={{ background: '#fff' }}>
+                <Header style={{ background: '#fff', display: 'flex', alignItems: 'center' }}>
+                    <Avatar src="icons/extension-icon-x128.png" size="large" />
+                    <Title level={3} style={{ margin: '0 0 0 10px' }}>
+                        矽羽+1智慧小幫手
+                    </Title>
+                </Header>
+                <Content style={{ padding: '20px' }}>
+                    <Title level={4}>社團貼文+1</Title>
+                    <Paragraph>請在以下格式網址導出社團貼文和留言：</Paragraph>
+                    <List
+                        bordered
+                        dataSource={data}
+                        renderItem={(item) => (
+                            <List.Item>
+                                <Space>{item}</Space>
+                            </List.Item>
+                        )}
+                    />
+                </Content>
+            </Layout>
         </div>
     );
 };

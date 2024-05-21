@@ -4,7 +4,7 @@ import pkg from '../package.json';
 import { __DEV__ } from '../server/utils/constants';
 
 const manifest: Manifest.WebExtensionManifest = {
-    name: pkg.displayName,
+    name: '矽羽+1智慧小幫手',
     version: pkg.version,
     description: pkg.description,
     manifest_version: 3,
@@ -50,22 +50,6 @@ const manifest: Manifest.WebExtensionManifest = {
             run_at: 'document_end',
             //    "run_at": "document_start"
         },
-        // {
-        //     css: ['css/all.css'],
-        //     js: ['js/all.js', ...(__DEV__ ? [] : ['js/all.js'])],
-        //     run_at: 'document_end',
-        //     matches: [
-        //         'https://*.facebook.com/*',
-        //         'https://*.facebook.com/groups/*/permalink/*',
-        //         'https://*.facebook.com/permalink.php?story_fbid=*&id=*',
-        //         'https://*.facebook.com/*/posts/*',
-        //         'https://*.facebook.com/*/permalink/*',
-        //         'https://*.facebook.com/photo.php?fbid=*&set=a*',
-        //         'https://*.facebook.com/groups/*?post_id=*',
-        //         'https://*.facebook.com/groups/*',
-        //     ],
-        //     all_frames: true,
-        // },
     ],
     action: {
         default_popup: 'popup.html',
