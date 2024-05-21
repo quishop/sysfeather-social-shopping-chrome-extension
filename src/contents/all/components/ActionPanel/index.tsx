@@ -63,7 +63,7 @@ const ActionPanel = () => {
             }}
         >
             <div style={{ width: '100%', textAlign: 'center' }}>
-                <Title level={3}>獲取留言</Title>
+                <Title level={3}>獲取貼文</Title>
                 <Button
                     type="primary"
                     loading={loadings}
