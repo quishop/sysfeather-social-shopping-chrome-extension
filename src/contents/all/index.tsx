@@ -38,7 +38,6 @@ try {
         document.body.appendChild(div);
         const root = createRoot(div);
         root.render(<ActionPanel />);
-
     }
 } catch (e) {
     console.log('error');
@@ -121,6 +120,40 @@ export async function getCreationTime(funcType: number) {
     return timeText;
 }
 
+// // 取得FB顯示留言長度
+// export function getFBCommitLength() {
+//     let commitClass;
+//     const targetElement = getTargetPostClassFromDocumentBody()[0];
+//     for (const postCommitDiv of classTable.postCommitDiv) {
+//         commitClass = targetElement.parentNode.parentNode.querySelector(postCommitDiv);
+//         if (commitClass) {
+//             break;
+//         }
+//     }
+
+//     if (!commitClass) {
+//         throw 'nullPostCommit'; // 在Mode.js 捕捉初始化錯誤
+//     }
+
+//     let FBlength = 0;
+//     try {
+//         let FBPostCommit = null;
+//         for (let i = 0; i < classTable.FBPostCommit.length; i++) {
+//             const element = classTable.FBPostCommit[i];
+//             FBPostCommit = commitClass.querySelector(element);
+//             if (FBPostCommit) break;
+//         }
+//         let content = FBPostCommit.textContent;
+//         if (content.indexOf('則留言') != -1) {
+//             return parseInt(content.split('則留言')[0].replace(',', ''));
+//         }
+//     } catch (e) {
+//         console.log('length error:', e);
+//     }
+//     console.log('FBlength', FBlength);
+//     return FBlength;
+// }
+
 // 取得FB顯示留言長度
 export function getFBCommitLength() {
     let commitClass;
@@ -139,8 +172,8 @@ export function getFBCommitLength() {
     let FBlength = 0;
     try {
         let FBPostCommit = null;
-        for (let i = 0; i < classTable.FBPostCommit.length; i++) {
-            const element = classTable.FBPostCommit[i];
+        for (let i = 0; i < classTable.pageFBPostCommit.length; i++) {
+            const element = classTable.pageFBPostCommit[i];
             FBPostCommit = commitClass.querySelector(element);
             if (FBPostCommit) break;
         }
@@ -149,7 +182,6 @@ export function getFBCommitLength() {
             return parseInt(content.split('則留言')[0].replace(',', ''));
         }
     } catch (e) {}
-
     return FBlength;
 }
 
@@ -475,6 +507,7 @@ export async function fetchCommentsList(node) {
             curCommentsList.push(item);
         });
         const hasMore = await check(node, null);
+        console.log('hasMore:', hasMore);
         if (hasMore) {
             return fetchCommentsList(node);
         } else {
@@ -586,6 +619,20 @@ export function clickcheckMore(nodes) {
                 }
             }
         }
+
+        if (nodes.querySelectorAll('[dir="auto"]') && count == 0) {
+            let autoDivs = nodes.querySelectorAll('[dir="auto"]');
+            autoDivs.forEach((autoDiv) => {
+                if (autoDiv.textContent.includes('查看') && autoDiv.textContent.includes('回覆')) {
+                    count++;
+                    autoDiv.click();
+                }
+                if (autoDiv.textContent === '查看更多留言') {
+                    count++;
+                    autoDiv.click();
+                }
+            });
+        }
         /*
       if(el.textContent.indexOf("則回覆") != "-1") {
         if(el.textContent.indexOf("檢視") != "-1") {
@@ -620,6 +667,7 @@ export function clickcheckMore(nodes) {
 // 檢查是否還有更多留言按鈕。
 // 回傳true 表示點擊按鈕，畫面可能會變動。
 export function clickMoreCommit(nodes) {
+    console.log('clickMoreCommit:', nodes);
     if (!nodes) {
         //等待檢查是否會有空值情況發生
         return false;
@@ -649,9 +697,11 @@ export function clickMoreCommit(nodes) {
         loading = nodes.querySelector(element);
         if (loading) break;
     }
+    console.log('clickMoreCommit:', moreCommit, loading);
     if (!moreCommit && !loading) {
         return false;
     }
+
     let count = 0;
     let moreCommitArr = null;
     for (let i = 0; i < classTable.postViewCommitCommit.length; i++) {
@@ -666,6 +716,7 @@ export function clickMoreCommit(nodes) {
             element.click();
         }
     }
+    console.log('count:', count, loading);
     if (count || loading) {
         return true;
     }

@@ -19,6 +19,7 @@ const ActionPanel = () => {
         const fetchPostOwner = getPostOwner();
         const fetchCreationTime = getCreationTime(1);
         const fetchCommentList = fetchComments();
+
         Promise.all([fetchPostNumInfo, fetchPostOwner, fetchCreationTime, fetchCommentList])
             .then((response) => {
                 const data = {

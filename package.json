@@ -3,7 +3,7 @@
     "displayName": "sysfeather-social-shopping-chrome-extension",
     "version": "1.0.0",
     "browserslist": "Chrome >= 96",
-    "description": "made by awesome-chrome-extension-boilerplate",
+    "description": "made by Sysfeather ",
     "private": true,
     "license": "MIT",
     "engines": {
