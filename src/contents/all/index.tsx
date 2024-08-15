@@ -71,7 +71,15 @@ function isFacebookPostUrl(url: string) {
     const regexPermalinkAndPost =
         /^https:\/\/www\.facebook\.com\/groups\/[A-Za-z0-9_-]+\/permalink\/[0-9]+\/?$/;
     const regexPost = /^https:\/\/www\.facebook\.com\/groups\/[A-Za-z0-9_-]+\/posts\/[0-9]+\/?$/;
-    const res = regexPermalinkAndPost.test(url) || regexPost.test(url);
+    const regrexPrivatePermalinkAndPost =
+        /https:\/\/www\.facebook\.com\/groups\/[a-zA-Z0-9]+\/permalink\/\d+\//;
+    const regrexPrivatePost = /https:\/\/www\.facebook\.com\/groups\/[a-zA-Z0-9]+\/posts\/\d+\//;
+
+    const res =
+        regexPermalinkAndPost.test(url) ||
+        regexPost.test(url) ||
+        regrexPrivatePermalinkAndPost.test(url) ||
+        regrexPrivatePost.test(url);
     console.log('url:', url, res);
     return res;
 }
@@ -467,6 +475,7 @@ export async function fetchComments() {
             }
         }
     }
+    console.log('node:', node);
     const comments = await fetchCommentsList(node);
     console.log('comments:', comments);
     if (comments) return comments;
@@ -477,6 +486,7 @@ export async function fetchCommentsList(node) {
     if (!node) {
         return;
     }
+    console.log('node:', node);
     var unorderedList = node.querySelector('ul:not([class])');
 
     let check_style = true;
@@ -490,7 +500,7 @@ export async function fetchCommentsList(node) {
             }
         }
     }
-
+    console.log('unorderedList:', unorderedList);
     let oneComments = '';
     const res: any[] = [];
     for (const OneCommentDiv of classTable.OneCommentDiv) {
@@ -499,7 +509,7 @@ export async function fetchCommentsList(node) {
             break;
         }
     }
-
+    console.log('oneComments:', oneComments);
     if (oneComments) {
         let curCommentsList = [];
 
@@ -507,35 +517,110 @@ export async function fetchCommentsList(node) {
             curCommentsList.push(item);
         });
         const hasMore = await check(node, null);
-        console.log('hasMore:', hasMore);
+        // console.log('hasMore:', hasMore);
         if (hasMore) {
             return fetchCommentsList(node);
         } else {
-            curCommentsList = curCommentsList.filter(
-                (item) =>
-                    item.classList.contains('x78zum5') &&
-                    item.classList.contains('xdt5ytf') &&
-                    item.classList.length === 2,
-            );
-            curCommentsList.forEach((item, index) => {
-                let fbNameUrl = item.querySelector('a').href;
-
-                const comment = {
-                    message: getCommentMessage(1, item),
-                    id: getCommentId(1, getCommentUrlFromCommentTimeByCommentNode(item)),
-                    author: {
-                        name: getCommenterName(1, item),
-                        id: getCommentInfoObj(1, fbNameUrl).id,
-                        avata: findImageUrl(item),
-                    },
-                };
-                res.push(comment);
+            // console.log('curCommentsList1:', curCommentsList);
+            let res = [];
+            curCommentsList = curCommentsList.filter((item) => {
+                // console.log('item:', item, item.classList);
+                return (
+                    item.classList.contains('x169t7cy') &&
+                    item.classList.contains('x19f6ikt') &&
+                    item.classList.length === 2
+                );
+                // return unorderedList.querySelectorAll(
+                //     'div' +
+                //         'xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd xv6pb6r x10ick3y xg4rxxw xmjcpbm x10l6tqk xfo62xy',
+                // );
+                // const temp = unorderedList.querySelectorAll('div' + 'xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd xv6pb6r x10ick3y xg4rxxw xmjcpbm x10l6tqk xfo62xy');
+                // console.log('temp:', temp);
+                // res = res.concat(temp);
+                // return temp;
             });
+
+            // console.log('curCommentsList:', curCommentsList, res);
+            // curCommentsList.forEach((item, index) => {
+
+            curCommentsList.forEach((item, index) => {
+                const filteredChildren = item.querySelectorAll(
+                    '.html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd',
+                );
+
+                console.log('filteredChildren:', filteredChildren);
+                // for.forEach((item, index) => {
+                for (let i = 0; i < filteredChildren.length; i++) {
+                    const item = filteredChildren[i];
+                    console.log('new item:', item);
+                    const itemLink = item.querySelector('a');
+                    if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
+                        let fbNameUrl = item.querySelector('a').href;
+                        const commentUrl = getCommentUrlFromCommentTimeByCommentNode(item);
+                        const comment = {
+                            message: getCommentMessage(1, item),
+                            url: commentUrl,
+                            id: getCommentId(1, commentUrl),
+                            author: {
+                                name: getCommenterName(1, item),
+                                id: getCommentInfoObj(1, fbNameUrl).id,
+                                avata: findImageUrl(item),
+                            },
+                        };
+                        console.log('comment:', comment);
+                        res.push(comment);
+                    }
+                }
+                // fetchChildCommentListByCommentNode(item, res);
+                // });
+
+                // const comment = {
+                //     message: getCommentMessage(1, item),
+                //     id: getCommentId(1, getCommentUrlFromCommentTimeByCommentNode(item)),
+                //     author: {
+                //         name: getCommenterName(1, item),
+                //         id: getCommentInfoObj(1, fbNameUrl).id,
+                //         avata: findImageUrl(item),
+                //     },
+                // };
+                // res.push(comment);
+                // fetchChildCommentListByCommentNode(item, res);
+            });
+            console.log('origin res:', res);
+            const filteredArray = [];
+            const idSet = new Set();
+
+            res.forEach((obj) => {
+                if (!idSet.has(obj.id)) {
+                    idSet.add(obj.id);
+                    filteredArray.push(obj);
+                }
+            });
+            res = filteredArray;
+            console.log('res:', res);
+
             return res;
         }
     }
 }
 
+function findAllNodesByClass(node, className, results = []) {
+    // Check if the current node is a 'div' with the desired class name
+    if (
+        node.nodeType === Node.ELEMENT_NODE &&
+        node.tagName === 'DIV' &&
+        node.classList.contains(className)
+    ) {
+        results.push(node);
+    }
+
+    // Recursively search in each child node
+    for (let child of node.children) {
+        findAllNodesByClass(child, className, results);
+    }
+
+    return results;
+}
 export async function wait(ms) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
@@ -798,7 +883,7 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
     } else {
         commentUrl = '';
     }
-
+    console.log('commentUrl:', commentNode, commentUrl);
     return commentUrl;
 }
 
@@ -836,18 +921,21 @@ export function getCommmitCommentNodeByCommentNode(commentNode) {
  * @returns
  */
 export function fetchChildCommentListByCommentNode(commentNode, postDataComments) {
+    console.log('fetchChildCommentListByCommentNode');
     for (let i = 0; i < classTable.oneCommentClass.length; i++) {
         let oneCommentClass = classTable.oneCommentClass[i];
         let oneCommentByCommentNode = commentNode.querySelector(oneCommentClass);
         if (oneCommentByCommentNode) {
             //現在在第一層
+            console.log('invoked1');
             fetchUnderOneCommentsListByCommentNode(oneCommentByCommentNode, postDataComments);
         } else if (oneCommentByCommentNode == null) {
             //找不到第一層的node，就去找第二層
+            console.log('invoked2');
             fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments);
         }
     }
-
+    // console.log('invoked3')
     return;
 }
 
@@ -863,11 +951,37 @@ export function fetchUnderOneCommentsListByCommentNode(commentNode, postDataComm
     return;
 }
 
+// //處理第二層下的所有回覆
+// export function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments) {
+//     let allSecondComment = [];
+//     let querySelect = '.x169t7cy .x19f6ikt';
+//     // let querySelect = ".x1n2onr6 .x1xb5h2r"  //他是子層不能同時query喔！會重複抓取
+//     console.log('fetchUnderSecondCommentsListByCommentNode')
+//     if (commentNode.querySelectorAll(querySelect)) {
+//         console.log('fetchUnderSecondCommentsListByCommentNode invoked1')
+//         allSecondComment = commentNode.querySelectorAll(querySelect);
+//         for (let second_temp = 0; second_temp < allSecondComment.length; second_temp++) {
+//             if (allSecondComment[second_temp].childNodes.length > 0) {
+//                 let secondCommentChildNodesLength = allSecondComment[second_temp].childNodes.length;
+//                 let fetchData = {
+//                     node: allSecondComment[second_temp].childNodes[
+//                         secondCommentChildNodesLength - 1
+//                     ],
+//                     postDataComments: postDataComments,
+//                 };
+//                 fetchCommentsList(1, fetchData);
+//             }
+//         }
+//     }
+//     return;
+// }
+
 //處理第二層下的所有回覆
-export function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments) {
+function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments) {
     let allSecondComment = [];
-    let querySelect = '.x78zum5 .xdt5ytf';
+    let querySelect = '.x169t7cy .x19f6ikt';
     // let querySelect = ".x1n2onr6 .x1xb5h2r"  //他是子層不能同時query喔！會重複抓取
+    console.log('fetchUnderSecondCommentsListByCommentNode');
     if (commentNode.querySelectorAll(querySelect)) {
         allSecondComment = commentNode.querySelectorAll(querySelect);
         for (let second_temp = 0; second_temp < allSecondComment.length; second_temp++) {
@@ -879,7 +993,10 @@ export function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataC
                     ],
                     postDataComments: postDataComments,
                 };
-                fetchCommentsList(1, fetchData);
+                console.log('fetchUnderSecondCommentsListByCommentNode invoked1');
+                fetchCommentsList(
+                    allSecondComment[second_temp].childNodes[secondCommentChildNodesLength - 1],
+                );
             }
         }
     }
@@ -1010,7 +1127,10 @@ export function getCommentId(funcType, commentUrl) {
 
 export function getCommentIdByUrlSplitWord(url) {
     let id;
-    if (url.indexOf('?comment_id=') !== -1) {
+
+    if (url.indexOf('&reply_comment_id=') != -1) {
+        id = url.split('&reply_comment_id=')[1].split('&')[0];
+    } else if (url.indexOf('?comment_id=') !== -1) {
         id = url.split('?comment_id=')[1].split('&')[0];
     }
     return id;
@@ -1377,3 +1497,44 @@ function getfbPostNumFromPostUrl() {
     }
     return fbPostNum;
 }
+
+//檢查留言列表dom節點是否為空若為空就終止
+function checkCommentsNodeHasChild(node) {
+    let check = true;
+
+    if (!node || !node.hasChildNodes()) {
+        check = false;
+    }
+
+    if (check) {
+        let commentChildNode = node.childNodes;
+        if (
+            commentChildNode.length == 0 ||
+            !commentChildNode ||
+            !commentChildNode[0].querySelector('div')
+            //li[0].querySelector("div").getAttribute("aria-label")
+        ) {
+            check = false;
+        }
+    }
+
+    return check;
+}
+
+//  /**
+//    * - 遞迴留言列表的每個留言節點(含有頭像的)
+//    * @param {object} fetchData - 節點物件跟留言內容的籃子
+//    * @returns
+//    */
+//  fetchByCommentsListNode(fetchData) {
+//     if(!checkCommentsNodeHasChild(fetchData.node)) return
+//     let commentsListNode = fetchData.node.childNodes
+//     commentsListNode.forEach((commentNode) => {
+//       if(commentNode.nodeName == "#text"){
+//         //do nothing
+//       } else {
+//         getComment(commentNode, fetchData.postDataComments)
+//       }
+//     })
+
+//   }

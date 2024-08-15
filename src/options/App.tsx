@@ -81,12 +81,21 @@ const App = () => {
                         itemLayout="horizontal"
                         dataSource={data.comments}
                         renderItem={(item) => (
-                            <List.Item>
+                            <List.Item
+                                className="clickable-list-item"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.stopPropagation();
+                                    window.open(item.url, '_blank');
+                                }}
+                                style={{ cursor: 'pointer' }}
+                            >
                                 <List.Item.Meta
                                     avatar={
                                         <a
                                             href={`https://www.facebook.com/groups/${data.group.id}/user/${item.author.id}/`}
                                             target="_blank"
+                                            onClick={(e) => e.stopPropagation()}
                                         >
                                             <Avatar src={item.author.avata} />
                                         </a>
@@ -96,6 +105,7 @@ const App = () => {
                                             style={{ color: '#1677ff' }}
                                             href={`https://www.facebook.com/groups/${data.group.id}/user/${item.author.id}/`}
                                             target="_blank"
+                                            onClick={(e) => e.stopPropagation()}
                                         >
                                             {`${item.author.name}（${item.author.id})`}
                                         </a>

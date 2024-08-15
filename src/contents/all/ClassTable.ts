@@ -200,7 +200,15 @@ let classTable: any = {
     //每一個留言的DIV
     OneCommentDiv: [
         // 原結構：div > div
-        'x78zum5 xdt5ytf',
+        // 'x78zum5 xdt5ytf',
+        'x169t7cy x19f6ikt',
+    ],
+
+    //每一個留言的DIV
+    OneCommentNodeDiv: [
+        // 原結構：div > div
+        // 'x78zum5 xdt5ytf',
+        'xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd xv6pb6r x10ick3y xg4rxxw xmjcpbm x10l6tqk xfo62xy',
     ],
 
     // 貼文標題作者
