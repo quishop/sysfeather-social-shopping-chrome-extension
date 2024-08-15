@@ -2,9 +2,11 @@
   <img width="150" src="/public/new-sysfeather.png" alt="Sysfeather icon">
 </p>
 
-<h1 align="center">矽羽直播主控台</h1>
+<h1 align="center">矽羽+1智慧小幫手 Chrome Plugin</h1>
 
 # sysfeather-social-shopping-chrome-extension
+
+此專案為 Chrome 瀏覽器插件替代 Facebook 社團 API 權限停用後的解決方案，用以導出社團貼文內容和留言，支持開放/私密社團貼文。[使用文檔](https://quishop.atlassian.net/wiki/spaces/LRV/pages/315588652/Chrome+Plugin+1).
 
 ## :sparkles: 特性
 
