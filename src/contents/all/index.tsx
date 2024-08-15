@@ -2,7 +2,6 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import ActionPanel from './components/ActionPanel';
 import { sendMessage } from 'webext-bridge';
-// // import { main } from './components/MainFixedWindow.js';
 import './style.scss';
 import { classTable } from './ClassTable';
 import { htmlTable } from './HtmlTable';
@@ -10,30 +9,6 @@ import { htmlTable } from './HtmlTable';
 // Intercept fetch requests
 try {
     if (isFacebookPostUrl(window.location.href)) {
-        console.log('render2');
-        // let div = document.createElement('div');
-        // div.id = 'myCustomUI';
-        // div.innerHTML = '<h1>Hello, this is my custom UI!</h1>';
-        // // Append the custom UI to the body of the page
-        // document.body.appendChild(div);
-
-        // // // Optionally, inject some CSS
-        // let style = document.createElement('style');
-
-        // style.textContent = `
-        //     #myCustomUI {
-        //         position: fixed;
-        //         top: 0;
-        //         right: 0;
-        //         background: white;
-        //         border: 1px solid black;
-        //         padding: 10px;
-        //         z-index: 1000;
-        //     }
-        //     `;
-        // document.head.appendChild(style);
-        // src/contentScript.js
-
         const div = document.createElement('div');
         document.body.appendChild(div);
         const root = createRoot(div);
@@ -80,7 +55,6 @@ function isFacebookPostUrl(url: string) {
         regexPost.test(url) ||
         regrexPrivatePermalinkAndPost.test(url) ||
         regrexPrivatePost.test(url);
-    console.log('url:', url, res);
     return res;
 }
 
@@ -127,40 +101,6 @@ export async function getCreationTime(funcType: number) {
 
     return timeText;
 }
-
-// // 取得FB顯示留言長度
-// export function getFBCommitLength() {
-//     let commitClass;
-//     const targetElement = getTargetPostClassFromDocumentBody()[0];
-//     for (const postCommitDiv of classTable.postCommitDiv) {
-//         commitClass = targetElement.parentNode.parentNode.querySelector(postCommitDiv);
-//         if (commitClass) {
-//             break;
-//         }
-//     }
-
-//     if (!commitClass) {
-//         throw 'nullPostCommit'; // 在Mode.js 捕捉初始化錯誤
-//     }
-
-//     let FBlength = 0;
-//     try {
-//         let FBPostCommit = null;
-//         for (let i = 0; i < classTable.FBPostCommit.length; i++) {
-//             const element = classTable.FBPostCommit[i];
-//             FBPostCommit = commitClass.querySelector(element);
-//             if (FBPostCommit) break;
-//         }
-//         let content = FBPostCommit.textContent;
-//         if (content.indexOf('則留言') != -1) {
-//             return parseInt(content.split('則留言')[0].replace(',', ''));
-//         }
-//     } catch (e) {
-//         console.log('length error:', e);
-//     }
-//     console.log('FBlength', FBlength);
-//     return FBlength;
-// }
 
 // 取得FB顯示留言長度
 export function getFBCommitLength() {
@@ -486,7 +426,7 @@ export async function fetchCommentsList(node) {
     if (!node) {
         return;
     }
-    console.log('node:', node);
+
     var unorderedList = node.querySelector('ul:not([class])');
 
     let check_style = true;
@@ -509,7 +449,7 @@ export async function fetchCommentsList(node) {
             break;
         }
     }
-    console.log('oneComments:', oneComments);
+
     if (oneComments) {
         let curCommentsList = [];
 
@@ -517,39 +457,24 @@ export async function fetchCommentsList(node) {
             curCommentsList.push(item);
         });
         const hasMore = await check(node, null);
-        // console.log('hasMore:', hasMore);
+
         if (hasMore) {
             return fetchCommentsList(node);
         } else {
-            // console.log('curCommentsList1:', curCommentsList);
             let res = [];
             curCommentsList = curCommentsList.filter((item) => {
-                // console.log('item:', item, item.classList);
                 return (
                     item.classList.contains('x169t7cy') &&
                     item.classList.contains('x19f6ikt') &&
                     item.classList.length === 2
                 );
-                // return unorderedList.querySelectorAll(
-                //     'div' +
-                //         'xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd xv6pb6r x10ick3y xg4rxxw xmjcpbm x10l6tqk xfo62xy',
-                // );
-                // const temp = unorderedList.querySelectorAll('div' + 'xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd xv6pb6r x10ick3y xg4rxxw xmjcpbm x10l6tqk xfo62xy');
-                // console.log('temp:', temp);
-                // res = res.concat(temp);
-                // return temp;
             });
-
-            // console.log('curCommentsList:', curCommentsList, res);
-            // curCommentsList.forEach((item, index) => {
 
             curCommentsList.forEach((item, index) => {
                 const filteredChildren = item.querySelectorAll(
                     '.html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd',
                 );
 
-                console.log('filteredChildren:', filteredChildren);
-                // for.forEach((item, index) => {
                 for (let i = 0; i < filteredChildren.length; i++) {
                     const item = filteredChildren[i];
                     console.log('new item:', item);
@@ -571,22 +496,8 @@ export async function fetchCommentsList(node) {
                         res.push(comment);
                     }
                 }
-                // fetchChildCommentListByCommentNode(item, res);
-                // });
-
-                // const comment = {
-                //     message: getCommentMessage(1, item),
-                //     id: getCommentId(1, getCommentUrlFromCommentTimeByCommentNode(item)),
-                //     author: {
-                //         name: getCommenterName(1, item),
-                //         id: getCommentInfoObj(1, fbNameUrl).id,
-                //         avata: findImageUrl(item),
-                //     },
-                // };
-                // res.push(comment);
-                // fetchChildCommentListByCommentNode(item, res);
             });
-            console.log('origin res:', res);
+
             const filteredArray = [];
             const idSet = new Set();
 
@@ -597,7 +508,6 @@ export async function fetchCommentsList(node) {
                 }
             });
             res = filteredArray;
-            console.log('res:', res);
 
             return res;
         }
