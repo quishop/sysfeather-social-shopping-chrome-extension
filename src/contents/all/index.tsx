@@ -44,17 +44,18 @@ export async function switchContentState(node) {
 
 function isFacebookPostUrl(url: string) {
     const regexPermalinkAndPost =
-        /^https:\/\/www\.facebook\.com\/groups\/[A-Za-z0-9_-]+\/permalink\/[0-9]+\/?$/;
-    const regexPost = /^https:\/\/www\.facebook\.com\/groups\/[A-Za-z0-9_-]+\/posts\/[0-9]+\/?$/;
+        /^https:\/\/www\.facebook\.com\/groups\/.+?\/permalink\/[0-9]+\/?$/;
+    const regexPost = /^https:\/\/www\.facebook\.com\/groups\/.+?\/posts\/[0-9]+\/?$/;
     const regrexPrivatePermalinkAndPost =
-        /https:\/\/www\.facebook\.com\/groups\/[a-zA-Z0-9]+\/permalink\/\d+\//;
-    const regrexPrivatePost = /https:\/\/www\.facebook\.com\/groups\/[a-zA-Z0-9]+\/posts\/\d+\//;
+        /https:\/\/www\.facebook\.com\/groups\/.+?\/permalink\/\d+\//;
+    const regrexPrivatePost = /https:\/\/www\.facebook\.com\/groups\/.+?\/posts\/\d+\//;
+   
 
     const res =
         regexPermalinkAndPost.test(url) ||
         regexPost.test(url) ||
         regrexPrivatePermalinkAndPost.test(url) ||
-        regrexPrivatePost.test(url);
+        regrexPrivatePost.test(url)
     return res;
 }
 
