@@ -810,7 +810,7 @@ function parseTimeInput(input) {
         return formatDate(new Date(Date.now() - timeValue * 60 * 60 * 1000)); // hours
     } else if (input.includes('天') || input.includes('d')) {
         return formatDate(new Date(Date.now() - timeValue * 24 * 60 * 60 * 1000)); // days
-    } else if (input.includes('週') || input.includes('y')) {
+    } else if (input.includes('週') || input.includes('w')) {
         return formatDate(new Date(Date.now() - timeValue * 7 * 24 * 60 * 60 * 1000)); // weeks
     } else if (input.includes('年') || input.includes('y')) {
         return formatDate(new Date(Date.now() - timeValue * 365 * 24 * 60 * 60 * 1000)); // years
