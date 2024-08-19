@@ -15,7 +15,6 @@ try {
         root.render(<ActionPanel />);
     }
 } catch (e) {
-    console.log('error');
     console.log('error:', e);
 }
 
@@ -32,12 +31,9 @@ export async function switchContentState(node) {
         doCheckMoreComment = true;
     }
 
-    console.log('doCheckMoreComment:', textcontent, doCheckMoreComment);
     if (doCheckMoreComment) {
-        console.log('invoked');
         await commitstats.click();
         let selectCommitShowTmpBtn = getCommitSortListBtn(1);
-        console.log('selectCommitShowTmpBtn:', selectCommitShowTmpBtn);
         await selectCommitShowTmpBtn.click();
     }
 }
@@ -49,13 +45,12 @@ function isFacebookPostUrl(url: string) {
     const regrexPrivatePermalinkAndPost =
         /https:\/\/www\.facebook\.com\/groups\/.+?\/permalink\/\d+\//;
     const regrexPrivatePost = /https:\/\/www\.facebook\.com\/groups\/.+?\/posts\/\d+\//;
-   
 
     const res =
         regexPermalinkAndPost.test(url) ||
         regexPost.test(url) ||
         regrexPrivatePermalinkAndPost.test(url) ||
-        regrexPrivatePost.test(url)
+        regrexPrivatePost.test(url);
     return res;
 }
 
@@ -416,9 +411,9 @@ export async function fetchComments() {
             }
         }
     }
-    console.log('node:', node);
+
     const comments = await fetchCommentsList(node);
-    console.log('comments:', comments);
+
     if (comments) return comments;
 }
 
@@ -441,7 +436,7 @@ export async function fetchCommentsList(node) {
             }
         }
     }
-    console.log('unorderedList:', unorderedList);
+
     let oneComments = '';
     const res: any[] = [];
     for (const OneCommentDiv of classTable.OneCommentDiv) {
@@ -478,22 +473,22 @@ export async function fetchCommentsList(node) {
 
                 for (let i = 0; i < filteredChildren.length; i++) {
                     const item = filteredChildren[i];
-                    console.log('new item:', item);
                     const itemLink = item.querySelector('a');
                     if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
                         let fbNameUrl = item.querySelector('a').href;
-                        const commentUrl = getCommentUrlFromCommentTimeByCommentNode(item);
+                        const commentUrlAndTime = getCommentUrlFromCommentTimeByCommentNode(item);
+           
                         const comment = {
                             message: getCommentMessage(1, item),
-                            url: commentUrl,
-                            id: getCommentId(1, commentUrl),
+                            url: commentUrlAndTime.commentUrl,
+                            id: getCommentId(1, commentUrlAndTime.commentUrl),
+                            time: commentUrlAndTime.commentTime,
                             author: {
                                 name: getCommenterName(1, item),
                                 id: getCommentInfoObj(1, fbNameUrl).id,
                                 avata: findImageUrl(item),
                             },
                         };
-                        console.log('comment:', comment);
                         res.push(comment);
                     }
                 }
@@ -554,7 +549,7 @@ export async function check(node, resolve) {
     await wait(2000);
     let checkMoreStatus = clickcheckMore(node);
     let clickMoreStatus = clickMoreCommit(node);
-    console.log('status:', checkMoreStatus, clickMoreStatus);
+
     // if (checkMoreStatus && checkMoreStatus == clickMoreStatus) {
     if (checkMoreStatus && checkMoreStatus !== clickMoreStatus) {
         //找留言列表準備抓留言內容
@@ -692,7 +687,6 @@ export function getCommitSortListBtn(funcType) {
             selectCommitShowNewBtn = getCommitSwitchBtn(getCommitSortListNode);
             break;
     }
-    console.log('selectCommitShowNewBtn:', selectCommitShowNewBtn);
 
     return selectCommitShowNewBtn;
 }
@@ -725,7 +719,7 @@ export function getCommitSwitchBtn(nodeFetcher) {
     } else {
         switchNewBtn = selectCommitShowTmp[selectCommitShowTmp.length - 1];
     }
-    console.log('switchNewBtn:', switchNewBtn);
+
     return switchNewBtn;
 }
 
@@ -743,7 +737,7 @@ export function getCommitSortListNode() {
             break;
         }
     }
-    console.log('commitSortList:', commitSortList);
+
     return commitSortList;
 }
 
@@ -788,14 +782,52 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
         if (tmpPostTime) break;
     }
 
+    let commentTime = 'unknown';
+
     if (tmpPostTime) {
         commentUrl =
             tmpPostTime.href.indexOf('&__cft__') != -1 ? tmpPostTime.href.split('&__cft__')[0] : '';
+
+        const postTimeNode = tmpPostTime.querySelector('span');
+
+        if (postTimeNode) {
+            commentTime = parseTimeInput(postTimeNode.textContent);
+        }
     } else {
         commentUrl = '';
     }
-    console.log('commentUrl:', commentNode, commentUrl);
-    return commentUrl;
+
+    return { commentUrl, commentTime };
+}
+
+function parseTimeInput(input) {
+    // Get the number from the input
+    const timeValue = parseInt(input, 10);
+    // Determine the unit and convert accordingly
+    if (input.includes('分鐘') || input.includes('m')) {
+        return formatDate(new Date(Date.now() - timeValue * 60 * 1000)); // minutes
+    } else if (input.includes('小時') || input.includes('h')) {
+        return formatDate(new Date(Date.now() - timeValue * 60 * 60 * 1000)); // hours
+    } else if (input.includes('天') || input.includes('d')) {
+        return formatDate(new Date(Date.now() - timeValue * 24 * 60 * 60 * 1000)); // days
+    } else if (input.includes('週') || input.includes('y')) {
+        return formatDate(new Date(Date.now() - timeValue * 7 * 24 * 60 * 60 * 1000)); // weeks
+    } else if (input.includes('年') || input.includes('y')) {
+        return formatDate(new Date(Date.now() - timeValue * 365 * 24 * 60 * 60 * 1000)); // years
+    } else {
+        return 'unknown';
+    }
+}
+
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
 }
 
 /**
@@ -832,21 +864,20 @@ export function getCommmitCommentNodeByCommentNode(commentNode) {
  * @returns
  */
 export function fetchChildCommentListByCommentNode(commentNode, postDataComments) {
-    console.log('fetchChildCommentListByCommentNode');
     for (let i = 0; i < classTable.oneCommentClass.length; i++) {
         let oneCommentClass = classTable.oneCommentClass[i];
         let oneCommentByCommentNode = commentNode.querySelector(oneCommentClass);
         if (oneCommentByCommentNode) {
             //現在在第一層
-            console.log('invoked1');
+
             fetchUnderOneCommentsListByCommentNode(oneCommentByCommentNode, postDataComments);
         } else if (oneCommentByCommentNode == null) {
             //找不到第一層的node，就去找第二層
-            console.log('invoked2');
+
             fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments);
         }
     }
-    // console.log('invoked3')
+
     return;
 }
 
@@ -892,7 +923,7 @@ function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments
     let allSecondComment = [];
     let querySelect = '.x169t7cy .x19f6ikt';
     // let querySelect = ".x1n2onr6 .x1xb5h2r"  //他是子層不能同時query喔！會重複抓取
-    console.log('fetchUnderSecondCommentsListByCommentNode');
+
     if (commentNode.querySelectorAll(querySelect)) {
         allSecondComment = commentNode.querySelectorAll(querySelect);
         for (let second_temp = 0; second_temp < allSecondComment.length; second_temp++) {
@@ -904,7 +935,7 @@ function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments
                     ],
                     postDataComments: postDataComments,
                 };
-                console.log('fetchUnderSecondCommentsListByCommentNode invoked1');
+
                 fetchCommentsList(
                     allSecondComment[second_temp].childNodes[secondCommentChildNodesLength - 1],
                 );
@@ -1054,9 +1085,7 @@ export function getCommentIdByUrlSplitWord(url) {
  */
 export function fetchByCommentsListNode(fetchData) {
     let commentsListNode = fetchData.childNodes;
-    commentsListNode.forEach((commentNode) => {
-        console.log('commentNode:', commentNode);
-    });
+    commentsListNode.forEach((commentNode) => {});
 }
 
 /**
@@ -1355,7 +1384,7 @@ export function getFbGroupId(funcType) {
         default:
             break;
     }
-    console.log('getFbGroupId:', groupId);
+
     return groupId;
 }
 

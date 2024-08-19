@@ -110,7 +110,12 @@ const App = () => {
                                             {`${item.author.name}（${item.author.id})`}
                                         </a>
                                     }
-                                    description={item.message}
+                                    description={
+                                        <div>
+                                            <div style={{ color: '#050505' }}>{item.message}</div>
+                                            <div>{item.time}</div>
+                                        </div>
+                                    }
                                 />
                             </List.Item>
                         )}
