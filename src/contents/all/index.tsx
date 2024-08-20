@@ -94,7 +94,7 @@ export async function getCreationTime(funcType: number) {
             timeText = await getCreationTimeByPostHtml();
             break;
     }
-
+  
     return timeText;
 }
 
@@ -477,7 +477,7 @@ export async function fetchCommentsList(node) {
                     if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
                         let fbNameUrl = item.querySelector('a').href;
                         const commentUrlAndTime = getCommentUrlFromCommentTimeByCommentNode(item);
-           
+
                         const comment = {
                             message: getCommentMessage(1, item),
                             url: commentUrlAndTime.commentUrl,

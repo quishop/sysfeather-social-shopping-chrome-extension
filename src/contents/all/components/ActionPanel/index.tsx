@@ -57,14 +57,29 @@ const ActionPanel = () => {
                 top: '0',
                 right: '20px',
                 backgroundColor: 'white',
-                border: '1px solid black',
+                borderStyle: 'none',
                 padding: '10px',
                 zIndex: 1000,
-                minWidth: '200px',
+                minWidth: '150px',
+                borderRadius: '20px',
+                boxShadow: 'rgba(153, 153, 153, 0.57) 0px 0px 1em',
             }}
         >
-            <div style={{ width: '100%', textAlign: 'center' }}>
-                <Title level={3}>獲取貼文</Title>
+            <div
+                style={{
+                    width: '100%',
+                    textAlign: 'center',
+                    boxShadow: 'rgba(173, 216, 230, 0.34) 0px 10px 1em',
+                    padding: '10px 0px',
+                    borderRadius: '10px',
+                }}
+            >
+                <Title level={4} style={{ margin: '0px 10px 0px 10px' }}>
+                    矽羽+1智慧小幫手
+                </Title>
+            </div>
+            <div style={{ width: '100%', textAlign: 'center', padding: '10px 0px' }}>
+                <Title level={5}>獲取貼文</Title>
                 <Button
                     type="primary"
                     loading={loadings}

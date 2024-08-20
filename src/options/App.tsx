@@ -16,28 +16,42 @@ const App = () => {
         });
     }, []);
 
+    function formatTimestamp(isoString: string) {
+        // Parse the ISO date string
+        const date = new Date(isoString);
+
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1; // Months are 0-indexed
+        const day = date.getDate();
+        const hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+
+        return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+    }
+
     return (
         <div className="app" style={{ paddingTop: '10px' }}>
             {contextHolder}
             <Paragraph style={{ textAlign: 'center' }}>
-                <Title level={2}>貼文內容</Title>
+                <Title level={2}>社團貼文</Title>
             </Paragraph>
             {data && (
                 <Card
                     title={
                         <>
                             <Paragraph>
-                                <Text strong>Group id:</Text> {data.group.id}
+                                <Text strong>社團 id:</Text> {data.group.id}
                                 <Text strong> </Text>
-                                <Text strong>Group name:</Text> {data.group.name}
+                                <Text strong>社團名稱:</Text> {data.group.name}
                             </Paragraph>
                             <Paragraph>
                                 <a
                                     href={`https://www.facebook.com/groups/${data.group.id}/user/${data.author.id}/`}
                                     target="_blank"
                                 >
-                                    <Text strong>Post by </Text> {data.author.name}（
-                                    {data.author.id}）
+                                    {data.author.name}（{data.author.id}）{' '}
+                                    <Text strong>的貼文</Text>
                                 </a>
                             </Paragraph>
                         </>
@@ -61,22 +75,22 @@ const App = () => {
                     style={{ margin: 20 }}
                 >
                     <Paragraph>
-                        <Text strong>Post id:</Text> {`${data.post.num}`}
+                        <Text strong>貼文 id:</Text> {`${data.post.num}`}
                         <Text strong> </Text>
-                        <Text strong>Post Content:</Text> {data.post.text}
-                    </Paragraph>
-                    <Paragraph>
-                        <Text strong>Post URL:</Text>{' '}
+                        <Text strong>貼文連結:</Text>
                         <a href={data.post.url} target="_blank" rel="noopener noreferrer">
                             {data.post.url}
                         </a>
                     </Paragraph>
                     <Paragraph>
-                        <Text strong>Created At:</Text> {new Date(data.createTime).toLocaleString()}
+                        <Text strong>貼文內容:</Text> {data.post.text}
                     </Paragraph>
                     <Paragraph>
-                        <Text strong>Post Comments length:</Text> {data.commentsLength}
+                        <Text strong>貼文時間:</Text> {formatTimestamp(data.createTime)}
+                        <Text strong> </Text>
+                        <Text strong>留言數量:</Text> {data.commentsLength}
                     </Paragraph>
+
                     <List
                         itemLayout="horizontal"
                         dataSource={data.comments}
