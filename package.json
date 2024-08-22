@@ -1,7 +1,7 @@
 {
     "name": "sysfeather-social-shopping-chrome-extension",
     "displayName": "sysfeather-social-shopping-chrome-extension",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "browserslist": "Chrome >= 96",
     "description": "made by Sysfeather ",
     "private": true,
