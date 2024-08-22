@@ -54,7 +54,7 @@ const ActionPanel = () => {
         <div
             style={{
                 position: 'fixed',
-                top: '0',
+                top: '70px',
                 right: '20px',
                 backgroundColor: 'white',
                 borderStyle: 'none',
