@@ -266,11 +266,13 @@ let classTable: any = {
 
     pagePostCommitDiv: [
         // 原結構：div > div > div
-        'x10wlt62 x6ikm8r x9jhf4c x30kzoy x13lgxp2 x168nmei',
+        "x10wlt62 x6ikm8r x9jhf4c x30kzoy x13lgxp2 x168nmei",
         'x168nmei x13lgxp2 x30kzoy x9jhf4c x6ikm8r x10wlt62',
+        "xabvvm4 xeyy32k x1ia1hqs x1a2w583 x6ikm8r x10wlt62",
         // page live post
-        'x78zum5 xdt5ytf xtp0wl1',
-    ],
+        "x78zum5 xdt5ytf xtp0wl1",
+      ],
+    
 
     pageCommentTime: [
         // 原結構：li > a[href]

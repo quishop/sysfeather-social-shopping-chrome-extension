@@ -29,7 +29,8 @@ const ActionPanel = () => {
                     },
                     author: response[1],
                     createTime: new Date((response[2] as number) * 1000),
-                    commentsLength: getFBCommitLength(),
+
+                    commentsLength: response[3]?.length || 0,
                     post: response[0],
                     comments: response[3],
                 };
@@ -37,7 +38,6 @@ const ActionPanel = () => {
                 chrome.runtime.sendMessage({ action: 'sendData', data: data }, (response) => {
                     console.log('sendData:0', response.status);
                 });
-                console.log('invoked send');
                 // sendMessage('hello-from-content-script', JSON.stringify(data), 'background');
             })
             .catch((e) => {

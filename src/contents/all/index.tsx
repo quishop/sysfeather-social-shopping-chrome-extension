@@ -94,7 +94,7 @@ export async function getCreationTime(funcType: number) {
             timeText = await getCreationTimeByPostHtml();
             break;
     }
-  
+
     return timeText;
 }
 
@@ -402,8 +402,10 @@ export async function fetchComments() {
     // let node = document.querySelector('body'); // this.postHeader
     let target = targetElement.parentNode.parentNode; // this.postHeader
     let node;
+
     while (!node) {
         for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
+           
             const pagePostCommitDiv = target.querySelector(pagePostCommitClass);
             if (pagePostCommitDiv) {
                 node = pagePostCommitDiv;
@@ -411,9 +413,8 @@ export async function fetchComments() {
             }
         }
     }
-
+    
     const comments = await fetchCommentsList(node);
-
     if (comments) return comments;
 }
 
