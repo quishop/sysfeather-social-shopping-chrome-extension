@@ -405,7 +405,6 @@ export async function fetchComments() {
 
     while (!node) {
         for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
-           
             const pagePostCommitDiv = target.querySelector(pagePostCommitClass);
             if (pagePostCommitDiv) {
                 node = pagePostCommitDiv;
@@ -413,7 +412,7 @@ export async function fetchComments() {
             }
         }
     }
-    
+
     const comments = await fetchCommentsList(node);
     if (comments) return comments;
 }
@@ -478,7 +477,7 @@ export async function fetchCommentsList(node) {
                     if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
                         let fbNameUrl = item.querySelector('a').href;
                         const commentUrlAndTime = getCommentUrlFromCommentTimeByCommentNode(item);
-
+                        console.log('commentUrlAndTime', commentUrlAndTime);
                         const comment = {
                             message: getCommentMessage(1, item),
                             url: commentUrlAndTime.commentUrl,
@@ -784,16 +783,11 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
     }
 
     let commentTime = 'unknown';
-
     if (tmpPostTime) {
         commentUrl =
             tmpPostTime.href.indexOf('&__cft__') != -1 ? tmpPostTime.href.split('&__cft__')[0] : '';
 
-        const postTimeNode = tmpPostTime.querySelector('span');
-
-        if (postTimeNode) {
-            commentTime = parseTimeInput(postTimeNode.textContent);
-        }
+        commentTime = parseTimeInput(tmpPostTime.textContent);
     } else {
         commentUrl = '';
     }
