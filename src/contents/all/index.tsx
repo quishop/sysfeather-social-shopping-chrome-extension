@@ -781,18 +781,35 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
         tmpPostTime = commentNode.querySelector(element);
         if (tmpPostTime) break;
     }
-
+    console.log('tmpPostTime:', commentNode, tmpPostTime);
     let commentTime = 'unknown';
     if (tmpPostTime) {
-        commentUrl =
-            tmpPostTime.href.indexOf('&__cft__') != -1 ? tmpPostTime.href.split('&__cft__')[0] : '';
-
+        commentUrl = findFirstAnchorTag(tmpPostTime);
         commentTime = parseTimeInput(tmpPostTime.textContent);
     } else {
         commentUrl = '';
     }
 
+    console.log('commentUrl:', commentUrl, commentTime);
     return { commentUrl, commentTime };
+}
+
+function findFirstAnchorTag(element) {
+    // If the element is an 'a' tag, return it
+    if (element.tagName === 'A') {
+        return element.href.indexOf('&__cft__') != -1 ? element.href.split('&__cft__')[0] : '';
+    }
+
+    // Loop through child elements recursively
+    for (let child of element.children) {
+        let found = findFirstAnchorTag(child);
+        if (found) {
+            return found;
+        }
+    }
+
+    // Return null if no anchor tag is found
+    return '';
 }
 
 function parseTimeInput(input) {
