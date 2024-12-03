@@ -24,11 +24,32 @@ let classTable: any = {
     // 貼文標題裡面有貼文作者姓名和貼文時間。
     // 單篇更新按鈕也是放在貼文標題裡面。
     postClass: [
+        'x1n2onr6 x1ja2u2z x1jx94hy x1qpq9i9 xdney7k xu5ydu1 xt3gfkd x9f619 xh8yej3 x6ikm8r x10wlt62 xquyuld',
+         'x1yztbdb x1n2onr6 xh8yej3 x1ja2u2z',
         'pybr56ya dati1w0a hv4rvrfc n851cfcs btwxx1t3 j83agx80 ll8tlv6m',
         'hael596l alzwoclg jl2a5g8c qjfq86k5 r227ecj6 gt60zsk1 s1m0hq7j',
         // 原結構：div > div
         'x1cy8zhl x78zum5 x1q0g3np xod5an3 x1pi30zi x1swvt13 xz9dl7a',
+        'x1n2onr6 x1ja2u2z x1jx94hy x1qpq9i9 xdney7k xu5ydu1 xt3gfkd x9f619 xh8yej3 x6ikm8r x10wlt62 xquyuld',
+        // 'x1yztbdb x1n2onr6 xh8yej3 x1ja2u2z'
     ],
+
+
+
+
+    //     // 貼文標題。
+    // // 貼文標題裡面有貼文作者姓名和貼文時間。
+    // // 單篇更新按鈕也是放在貼文標題裡面。
+    // postClass: [
+    //      'x1n2onr6 x1ja2u2z x1jx94hy x1qpq9i9 xdney7k xu5ydu1 xt3gfkd x9f619 xh8yej3 x6ikm8r x10wlt62 xquyuld',
+    //      'x1yztbdb x1n2onr6 xh8yej3 x1ja2u2z',
+    //     'pybr56ya dati1w0a hv4rvrfc n851cfcs btwxx1t3 j83agx80 ll8tlv6m',
+    //     'hael596l alzwoclg jl2a5g8c qjfq86k5 r227ecj6 gt60zsk1 s1m0hq7j',
+    //     // 原結構：div > div
+    //     'x1cy8zhl x78zum5 x1q0g3np xod5an3 x1pi30zi x1swvt13 xz9dl7a',
+    //     // 'x1n2onr6 x1ja2u2z x1jx94hy x1qpq9i9 xdney7k xu5ydu1 xt3gfkd x9f619 xh8yej3 x6ikm8r x10wlt62 xquyuld',
+    //     // 'x1yztbdb x1n2onr6 xh8yej3 x1ja2u2z'
+    // ],
     postName: ['nc684nl6'],
 
     // 展開貼文"顯示更多"按鈕
@@ -67,6 +88,8 @@ let classTable: any = {
         // 原結構：div > div
         'x1iorvi4 x1pi30zi x1l90r2v x1swvt13',
         'x1iorvi4 x1pi30zi xjkvuk6 x1swvt13',
+        'x78zum5 xdt5ytf x1iyjqo2',
+        'x6s0dn4 x78zum5 xdt5ytf x193iq5w x1t2pt76 xh8yej3'
     ],
     postCommit: [
         'rq0escxv l9j0dhe7 du4w35lb j83agx80 g5gj957u rj1gh0hx buofh1pr hpfvmrgz taijpn5t bp9cbjyn owycx6da btwxx1t3 d1544ag0 tw6a2znq jb3vyjys dlv3wnog rl04r1d5 mysgfdmx hddg9phg qu8okrzs g0qnabr5',
@@ -278,6 +301,7 @@ let classTable: any = {
         'xabvvm4 xeyy32k x1ia1hqs x1a2w583 x6ikm8r x10wlt62',
         // page live post
         'x78zum5 xdt5ytf xtp0wl1',
+       
     ],
 
     pageCommentTime: [

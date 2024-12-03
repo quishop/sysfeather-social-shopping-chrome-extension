@@ -58,7 +58,7 @@ function isFacebookPostUrl(url: string) {
 export async function getPostOwner() {
     let postOwnerId = '';
 
-    const targetElement = getTargetPostClassFromDocumentBody()[0];
+    const targetElement = getTargetPostClassFromDocumentBody()[2];
     let postHeaderClass = targetElement.querySelectorAll('div.xu06os2.x1ok221b a.x1i10hfl');
     for (let i = 0; i < postHeaderClass.length; i++) {
         if (postHeaderClass[i].href.search('user') != -1) {
@@ -101,7 +101,7 @@ export async function getCreationTime(funcType: number) {
 // 取得FB顯示留言長度
 export function getFBCommitLength() {
     let commitClass;
-    const targetElement = getTargetPostClassFromDocumentBody()[0];
+    const targetElement = getTargetPostClassFromDocumentBody()[2];
     for (const postCommitDiv of classTable.postCommitDiv) {
         commitClass = targetElement.parentNode.parentNode.querySelector(postCommitDiv);
         if (commitClass) {
@@ -398,20 +398,18 @@ export function extractUserStringByBottomUser(scriptString) {
 }
 
 export async function fetchComments() {
-    const targetElement = getTargetPostClassFromDocumentBody()[0];
-    // let node = document.querySelector('body'); // this.postHeader
-    let target = targetElement.parentNode.parentNode; // this.postHeader
+    const targetElement = getTargetPostClassFromDocumentBody()[2];
     let node;
-
-    while (!node) {
-        for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
-            const pagePostCommitDiv = target.querySelector(pagePostCommitClass);
-            if (pagePostCommitDiv) {
-                node = pagePostCommitDiv;
-                break;
+    if (targetElement)
+        while (!node) {
+            for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
+                const pagePostCommitDiv = targetElement.querySelector(pagePostCommitClass);
+                if (pagePostCommitDiv) {
+                    node = pagePostCommitDiv;
+                    break;
+                }
             }
         }
-    }
 
     const comments = await fetchCommentsList(node);
     if (comments) return comments;
@@ -477,7 +475,6 @@ export async function fetchCommentsList(node) {
                     if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
                         let fbNameUrl = item.querySelector('a').href;
                         const commentUrlAndTime = getCommentUrlFromCommentTimeByCommentNode(item);
-                        console.log('commentUrlAndTime', commentUrlAndTime);
                         const comment = {
                             message: getCommentMessage(1, item),
                             url: commentUrlAndTime.commentUrl,
@@ -781,7 +778,6 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
         tmpPostTime = commentNode.querySelector(element);
         if (tmpPostTime) break;
     }
-    console.log('tmpPostTime:', commentNode, tmpPostTime);
     let commentTime = 'unknown';
     if (tmpPostTime) {
         commentUrl = findFirstAnchorTag(tmpPostTime);
@@ -790,7 +786,6 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
         commentUrl = '';
     }
 
-    console.log('commentUrl:', commentUrl, commentTime);
     return { commentUrl, commentTime };
 }
 
@@ -1153,7 +1148,7 @@ function getPostUrlFromComment() {
 
 // 取得貼文header
 export function getHeader(i) {
-    const targetElement = getTargetPostClassFromDocumentBody()[0];
+    const targetElement = getTargetPostClassFromDocumentBody()[2];
     // let node = document.querySelector('body'); // this.postHeader
     let node = targetElement.parentNode.parentNode; // this.postHeader
     let header = '';
@@ -1229,6 +1224,7 @@ export async function getPostNumInfo(funcType) {
     switch (funcType) {
         case 1:
             fbPostInfo = await getPostNumFromUrl(getPostNumFromUrlBySplitWord);
+
             if (fbPostInfo.num == null) {
                 fbPostInfo = await getPostNumFromHeader();
             }
@@ -1237,9 +1233,11 @@ export async function getPostNumInfo(funcType) {
             fbPostInfo = await getPostNumFromUrl(getPostNumFromUrlBySplitWordNoPost);
             break;
     }
-
+    console.log('fbPostInfo:', fbPostInfo);
     fbPostInfo = fixedPostInfo(fbPostInfo);
     fbPostInfo.text = getContentFn().trim();
+    // fbPostInfo.text = '';
+
     return fbPostInfo;
 }
 
@@ -1320,18 +1318,18 @@ async function getPostNumFromHeader() {
 }
 
 export const content = (selector) => {
-    // let contentNodes = postContentNode.querySelector(selector);
-    const targetNode = getTargetPostClassFromDocumentBody()[0].parentNode.parentNode;
+
+    const targetNode = getTargetPostClassFromDocumentBody()[2].parentNode.parentNode;
     if (targetNode) {
-        let contentNodes = targetNode.childNodes[2].querySelector(selector);
+        let contentNodes = targetNode.childNodes[0].querySelector(selector);
     }
-    return getContentText(targetNode.childNodes[2]);
-    //  return getContentText(contentNodes);
+    return getContentText(targetNode.childNodes[0]);
 };
 
 export const getContentFn = () => {
     for (let i = 0; i < classTable.postContent.length; i++) {
         let contentElement = classTable.postContent[i];
+        console.log('contentElement:',contentElement)
         const text = content(contentElement);
         if (text && text.trim() != '點擊可標註商品') {
             return text;
@@ -1342,7 +1340,7 @@ export const getContentFn = () => {
 };
 
 const getContentText = (contentNode) => {
-    if (contentNode !== null) {
+    if (contentNode !== null && contentNode.className !== 'xd665xh x10l6tqk x1dquyif') {
         if (contentNode.hasChildNodes()) {
             let text = '';
             contentNode.childNodes.forEach((element) => {
