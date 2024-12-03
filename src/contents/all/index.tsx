@@ -1318,7 +1318,6 @@ async function getPostNumFromHeader() {
 }
 
 export const content = (selector) => {
-
     const targetNode = getTargetPostClassFromDocumentBody()[2].parentNode.parentNode;
     if (targetNode) {
         let contentNodes = targetNode.childNodes[0].querySelector(selector);
@@ -1329,7 +1328,7 @@ export const content = (selector) => {
 export const getContentFn = () => {
     for (let i = 0; i < classTable.postContent.length; i++) {
         let contentElement = classTable.postContent[i];
-        console.log('contentElement:',contentElement)
+        console.log('contentElement:', contentElement);
         const text = content(contentElement);
         if (text && text.trim() != '點擊可標註商品') {
             return text;
