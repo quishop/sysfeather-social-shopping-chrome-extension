@@ -58,7 +58,9 @@ function isFacebookPostUrl(url: string) {
 export async function getPostOwner() {
     let postOwnerId = '';
 
-    const targetElement = getTargetPostClassFromDocumentBody()[2];
+    const targetElement =
+        getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1];
+
     let postHeaderClass = targetElement.querySelectorAll('div.xu06os2.x1ok221b a.x1i10hfl');
     for (let i = 0; i < postHeaderClass.length; i++) {
         if (postHeaderClass[i].href.search('user') != -1) {
@@ -101,7 +103,8 @@ export async function getCreationTime(funcType: number) {
 // 取得FB顯示留言長度
 export function getFBCommitLength() {
     let commitClass;
-    const targetElement = getTargetPostClassFromDocumentBody()[2];
+    const targetElement =
+        getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1];
     for (const postCommitDiv of classTable.postCommitDiv) {
         commitClass = targetElement.parentNode.parentNode.querySelector(postCommitDiv);
         if (commitClass) {
@@ -398,7 +401,8 @@ export function extractUserStringByBottomUser(scriptString) {
 }
 
 export async function fetchComments() {
-    const targetElement = getTargetPostClassFromDocumentBody()[2];
+    const targetElement =
+        getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1];
     let node;
     if (targetElement)
         while (!node) {
@@ -1148,7 +1152,8 @@ function getPostUrlFromComment() {
 
 // 取得貼文header
 export function getHeader(i) {
-    const targetElement = getTargetPostClassFromDocumentBody()[2];
+    const targetElement =
+        getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1];
     // let node = document.querySelector('body'); // this.postHeader
     let node = targetElement.parentNode.parentNode; // this.postHeader
     let header = '';
@@ -1318,7 +1323,9 @@ async function getPostNumFromHeader() {
 }
 
 export const content = (selector) => {
-    const targetNode = getTargetPostClassFromDocumentBody()[2].parentNode.parentNode;
+    const targetNode =
+        getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1]
+            .parentNode.parentNode;
     if (targetNode) {
         let contentNodes = targetNode.childNodes[0].querySelector(selector);
     }
@@ -1371,6 +1378,8 @@ const getContentText = (contentNode) => {
 //處理dom行為的function
 export function getTargetPostClassFromDocumentBody() {
     const _this = this;
+    console.log(document.querySelector('body'));
+
     let postClass = getTargetFromClassTablePost(document.querySelector('body'));
     return postClass;
 }
