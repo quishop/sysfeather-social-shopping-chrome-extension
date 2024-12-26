@@ -1343,6 +1343,14 @@ const getContentText = (contentNode) => {
         if (contentNode.hasChildNodes()) {
             let text = '';
             contentNode.childNodes.forEach((element) => {
+                if (
+                    element.className ===
+                        'html-div xdj266r x11i5rnm x1mh8g0r x18d9i69 x1cy8zhl x78zum5 x1q0g3np xod5an3 xz9dl7a x1ye3gou xn6708d' ||
+                    element.className === 'xabvvm4 xeyy32k x1ia1hqs x1a2w583 x6ikm8r x10wlt62' ||
+                    element.className ===
+                        'html-div xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6'
+                )
+                    return;
                 text += getContentText(element);
             });
 
