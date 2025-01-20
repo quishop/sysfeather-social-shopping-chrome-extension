@@ -24,6 +24,7 @@ let classTable: any = {
     // 貼文標題裡面有貼文作者姓名和貼文時間。
     // 單篇更新按鈕也是放在貼文標題裡面。
     postClass: [
+        'x1n2onr6 x1ja2u2z x1afcbsf xdt5ytf x1a2a7pz x71s49j x1qjc9v5 xrjkcco x58fqnu x1mh14rs xfkwgsy x78zum5 x1plvlek xryxfnj xcatxm7 xrgej4m xh8yej3',
         'x1n2onr6 x1ja2u2z x1jx94hy x1qpq9i9 xdney7k xu5ydu1 xt3gfkd x9f619 xh8yej3 x6ikm8r x10wlt62 xquyuld',
         'x1yztbdb x1n2onr6 xh8yej3 x1ja2u2z',
         'pybr56ya dati1w0a hv4rvrfc n851cfcs btwxx1t3 j83agx80 ll8tlv6m',
@@ -292,6 +293,7 @@ let classTable: any = {
     ],
 
     pagePostCommitDiv: [
+        'xwya9rg x11i5rnm x1e56ztr x1mh8g0r xh8yej3',
         // 原結構：div > div > div
         'x10wlt62 x6ikm8r x9jhf4c x30kzoy x13lgxp2 x168nmei',
         'x168nmei x13lgxp2 x30kzoy x9jhf4c x6ikm8r x10wlt62',

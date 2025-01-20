@@ -58,8 +58,8 @@ function isFacebookPostUrl(url: string) {
 export async function getPostOwner() {
     let postOwnerId = '';
 
-    const targetElement =
-        getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1];
+    const targetElementLength = getTargetPostClassFromDocumentBody().length;
+    const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
 
     let postHeaderClass = targetElement.querySelectorAll('div.xu06os2.x1ok221b a.x1i10hfl');
     for (let i = 0; i < postHeaderClass.length; i++) {
@@ -103,8 +103,8 @@ export async function getCreationTime(funcType: number) {
 // 取得FB顯示留言長度
 export function getFBCommitLength() {
     let commitClass;
-    const targetElement =
-        getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1];
+    const targetElementLength = getTargetPostClassFromDocumentBody().length;
+    const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
     for (const postCommitDiv of classTable.postCommitDiv) {
         commitClass = targetElement.parentNode.parentNode.querySelector(postCommitDiv);
         if (commitClass) {
@@ -401,17 +401,16 @@ export function extractUserStringByBottomUser(scriptString) {
 }
 
 export async function fetchComments() {
-    const targetElement =
-        getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1];
+    const targetElementLength = getTargetPostClassFromDocumentBody().length;
+    const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
+
     let node;
     if (targetElement)
-        while (!node) {
-            for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
-                const pagePostCommitDiv = targetElement.querySelector(pagePostCommitClass);
-                if (pagePostCommitDiv) {
-                    node = pagePostCommitDiv;
-                    break;
-                }
+        for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
+            const pagePostCommitDiv = targetElement.querySelector(pagePostCommitClass);
+            if (pagePostCommitDiv) {
+                node = pagePostCommitDiv;
+                break;
             }
         }
 
@@ -1164,9 +1163,18 @@ export function getHeader(i) {
     let headerHtml =
         // node.querySelectorAll("div.xu06os2.x1ok221b a.x1i10hfl");
         node.querySelectorAll('div.xu06os2.x1ok221b span.x4k7w5x.x1h91t0o a.x1i10hfl');
+    if (!headerHtml) {
+        headerHtml = node.querySelectorAll(
+            'div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1q0g3np a',
+        );
+    }
 
     for (let i = 0; i < headerHtml.length; i++) {
         if (headerHtml[i].href.search('posts') != -1) {
+            header = headerHtml[i];
+            break;
+        }
+        if (headerHtml[i].href.search('multi_permalinks') != -1) {
             header = headerHtml[i];
             break;
         }
@@ -1195,6 +1203,8 @@ export function getHeader(i) {
             header = node.querySelector(".buofh1pr").querySelectorAll(".qzhwtbm6.knvmm38d")[i].querySelector("a")
           }
     */
+    console.log('header:', header);
+
     return header;
 }
 
@@ -1225,7 +1235,6 @@ export async function getPostNumInfo(funcType) {
         num: '',
         text: '',
     };
-
     switch (funcType) {
         case 1:
             fbPostInfo = await getPostNumFromUrl(getPostNumFromUrlBySplitWord);
@@ -1239,6 +1248,7 @@ export async function getPostNumInfo(funcType) {
             break;
     }
     console.log('fbPostInfo:', fbPostInfo);
+
     fbPostInfo = fixedPostInfo(fbPostInfo);
     fbPostInfo.text = getContentFn().trim();
     // fbPostInfo.text = '';
@@ -1315,6 +1325,20 @@ async function getPostNumFromHeader() {
         num: '',
     };
     await getHeader(1).focus();
+    if (getHeader(1).href.indexOf('multi_permalinks') != -1) {
+        const url = getHeader(1).href;
+        const regex = /groups\/(\d+).*multi_permalinks=(\d+)/;
+        const matches = url.match(regex);
+        if (matches) {
+            const groupId = matches[1]; // groups 后面的 ID
+            const permalinkId = matches[2]; // multi_permalinks 中的 ID
+            fbPostInfo.url = `https://www.facebook.com/groups/${groupId}/permalink/${permalinkId}`;
+            fbPostInfo.num = permalinkId;
+        } else {
+            console.log('No matches found.');
+        }
+        return fbPostInfo;
+    }
     if (getHeader(1).href.indexOf('?__cft__[0]=') != -1) {
         fbPostInfo.url = getHeader(1).href.split('?__cft__[0]=')[0];
         fbPostInfo.num = fbPostInfo.url.split('/').filter((el) => el != '')[5];
