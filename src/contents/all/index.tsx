@@ -459,13 +459,13 @@ export async function fetchCommentsList(node) {
             return fetchCommentsList(node);
         } else {
             let res = [];
-            curCommentsList = curCommentsList.filter((item) => {
-                return (
-                    item.classList.contains('x169t7cy') &&
-                    item.classList.contains('x19f6ikt') &&
-                    item.classList.length === 2
-                );
-            });
+            // curCommentsList = curCommentsList.filter((item) => {
+            //     return (
+            //         item.classList.contains('x169t7cy') &&
+            //         item.classList.contains('x19f6ikt') &&
+            //         item.classList.length === 2
+            //     );
+            // });
 
             curCommentsList.forEach((item, index) => {
                 const filteredChildren = item.querySelectorAll(

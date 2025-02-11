@@ -223,12 +223,14 @@ let classTable: any = {
     // CommentDiv 是整篇留言最外層的DIV
     CommentDiv: [
         // 原結構：div > div
+        'x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp',
         'x1gslohp',
     ],
     //每一個留言的DIV
     OneCommentDiv: [
         // 原結構：div > div
         // 'x78zum5 xdt5ytf',
+        'x16hk5td x12rz0ws',
         'x169t7cy x19f6ikt',
     ],
 
