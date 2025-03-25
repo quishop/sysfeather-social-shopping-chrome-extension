@@ -213,7 +213,7 @@ function getGroupIDFromMeta(str) {
 
 export function getGroupID() {
     let groupId = '';
-    const searchStrings = ["{'groupID':'", '"groupID":"'];
+    const searchStrings = ["{'groupID':'", '"groupID":"', '"group_id":', "'group_id':"];
     try {
         for (const str of searchStrings) {
             if (groupId) {
@@ -240,10 +240,12 @@ function getGroupIDFromScript(domFetcher, str) {
     let id = '';
 
     const firstScript = domFetcher(str);
+    console.log('firstScript', firstScript);
 
     if (firstScript) {
         let start = firstScript.textContent.indexOf(str);
-        id = firstScript.textContent.substr(start + str.length).split('"')[0];
+        let splitStr = firstScript.textContent.substr(start + str.length).split('"');
+        id = splitStr[0] || splitStr[1];
     }
 
     return id;
