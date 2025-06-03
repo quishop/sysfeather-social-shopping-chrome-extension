@@ -223,6 +223,9 @@ export function getGroupID() {
             if (!groupId) {
                 groupId = getGroupIDFromMeta(str);
             }
+            if (!groupId) {
+                groupId = window.location.href.split('groups/')[1].split('/')[0];
+            }
         }
     } catch (error) {
         console.error(error);
@@ -240,7 +243,6 @@ function getGroupIDFromScript(domFetcher, str) {
     let id = '';
 
     const firstScript = domFetcher(str);
-    console.log('firstScript', firstScript);
 
     if (firstScript) {
         let start = firstScript.textContent.indexOf(str);
@@ -473,7 +475,7 @@ export async function fetchCommentsList(node) {
                 const filteredChildren = item.querySelectorAll(
                     '.html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd',
                 );
-
+                
                 for (let i = 0; i < filteredChildren.length; i++) {
                     const item = filteredChildren[i];
                     const itemLink = item.querySelector('a');
@@ -975,7 +977,6 @@ export function getCommenterName(funcType, commitCommentNode) {
 
 export function getCommenterNameByMsgClassCommitNode(commitCommentNode) {
     let commenterName = '';
-
     for (let i = 0; i < classTable.pageMsgName.length; i++) {
         let commentNameElement = commitCommentNode.querySelector(
             'span' + classTable.pageMsgName[i],
