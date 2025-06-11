@@ -77,11 +77,18 @@ export async function getPostOwner() {
             }
         }
     }
-    let postOwnerName = targetElement.querySelector(
-        'a.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1sur9pj.xkrqix3.xzsf02u.x1s688f',
-    );
-
-    return { name: postOwnerName ? postOwnerName.textContent : '', id: postOwnerId };
+    const postOwnerLinks = targetElement.querySelectorAll('a.x1i10hfl.xjbqb8w.x1ejq31n.x18oe1m7.x1sy0etr.xstzfhl.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.xkrqix3.x1sur9pj.x1s688f');
+    
+    let postOwnerName = null;
+    for (const link of postOwnerLinks) {
+        
+        const text = link.textContent;
+        if (text && text !== '') {
+            postOwnerName = text;
+            break;
+        }
+    }
+    return { name: postOwnerName ?? '', id: postOwnerId };
 }
 
 /**
@@ -430,8 +437,7 @@ export async function fetchCommentsList(node) {
 
     var unorderedList = node.querySelector('ul:not([class])');
 
-    let check_style = true;
-
+    let check_style = true;    
     if (unorderedList) {
     } else {
         for (const commentDiv of classTable.CommentDiv) {
@@ -441,14 +447,12 @@ export async function fetchCommentsList(node) {
             }
         }
     }
-
-    let oneComments = '';
+    let oneComments = [];
     const res: any[] = [];
     for (const OneCommentDiv of classTable.OneCommentDiv) {
-        oneComments = unorderedList.querySelectorAll('div' + OneCommentDiv);
-        if (oneComments) {
-            break;
-        }
+        Array.from(unorderedList.querySelectorAll('div' + OneCommentDiv)).forEach((item) => {
+            oneComments.push(item);
+        })
     }
 
     if (oneComments) {
@@ -469,33 +473,35 @@ export async function fetchCommentsList(node) {
             //         item.classList.contains('x19f6ikt') &&
             //         item.classList.length === 2
             //     );
-            // });
-
+            // });           
+             
             curCommentsList.forEach((item, index) => {
-                const filteredChildren = item.querySelectorAll(
-                    '.html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd',
-                );
-                
-                for (let i = 0; i < filteredChildren.length; i++) {
-                    const item = filteredChildren[i];
-                    const itemLink = item.querySelector('a');
-                    if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
-                        let fbNameUrl = item.querySelector('a').href;
-                        const commentUrlAndTime = getCommentUrlFromCommentTimeByCommentNode(item);
-                        const comment = {
-                            message: getCommentMessage(1, item),
-                            url: commentUrlAndTime.commentUrl,
-                            id: getCommentId(1, commentUrlAndTime.commentUrl),
-                            time: commentUrlAndTime.commentTime,
-                            author: {
-                                name: getCommenterName(1, item),
-                                id: getCommentInfoObj(1, fbNameUrl).id,
-                                avata: findImageUrl(item),
-                            },
-                        };
-                        res.push(comment);
-                    }
+                // let filteredChildren = [];
+                // for (const FilteredChildren of classTable.FilteredChildren) {
+                //     filteredChildren = item.querySelectorAll('div' + FilteredChildren);
+                //     if (filteredChildren.length > 0) {
+                //         break;
+                //     }
+                // }
+                const itemLink = item.querySelector('a');
+                if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
+                    let fbNameUrl = item.querySelector('a').href;
+                    const commentUrlAndTime = getCommentUrlFromCommentTimeByCommentNode(item);
+                    const comment = {
+                        message: getCommentMessage(1, item),
+                        url: commentUrlAndTime.commentUrl,
+                        id: getCommentId(1, commentUrlAndTime.commentUrl),
+                        time: commentUrlAndTime.commentTime,
+                        author: {
+                            name: getCommenterName(1, item),
+                            id: getCommentInfoObj(1, fbNameUrl).id,
+                            avata: findImageUrl(item),
+                        },
+                    };
+                    
+                    res.push(comment);
                 }
+                
             });
 
             const filteredArray = [];
@@ -785,6 +791,7 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
         tmpPostTime = commentNode.querySelector(element);
         if (tmpPostTime) break;
     }
+    
     let commentTime = 'unknown';
     if (tmpPostTime) {
         commentUrl = findFirstAnchorTag(tmpPostTime);
@@ -1110,7 +1117,7 @@ export function findImageUrl(node) {
     // Locate the element that contains the image URL using its class or other distinctive attributes
     const imageElement = node.querySelector(
         'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xa49m3k.xqeqjp1.x2hbi6w.x13fuv20.xu3j5b3.x1q0q8m5.x26u7qi.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xdl72j9.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1a2a7pz',
-    );
+    ) || node.querySelector('a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz');
 
     if (imageElement) {
         // Extract the URL from the 'xlink:href' attribute of the <image> tag inside the <svg>
@@ -1250,8 +1257,6 @@ export async function getPostNumInfo(funcType) {
             fbPostInfo = await getPostNumFromUrl(getPostNumFromUrlBySplitWordNoPost);
             break;
     }
-    console.log('fbPostInfo:', fbPostInfo);
-
     fbPostInfo = fixedPostInfo(fbPostInfo);
     fbPostInfo.text = getContentFn().trim();
     // fbPostInfo.text = '';
@@ -1352,7 +1357,7 @@ async function getPostNumFromHeader() {
 export const content = (selector) => {
     const targetNode =
         getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1]
-            .parentNode.parentNode;
+            .parentNode.parentNode;    
     if (targetNode) {
         let contentNodes = targetNode.childNodes[0].querySelector(selector);
     }
@@ -1362,8 +1367,7 @@ export const content = (selector) => {
 export const getContentFn = () => {
     for (let i = 0; i < classTable.postContent.length; i++) {
         let contentElement = classTable.postContent[i];
-        console.log('contentElement:', contentElement);
-        const text = content(contentElement);
+        const text = content(contentElement);        
         if (text && text.trim() != '點擊可標註商品') {
             return text;
         }
@@ -1373,18 +1377,30 @@ export const getContentFn = () => {
 };
 
 const getContentText = (contentNode) => {
+    
     if (contentNode !== null && contentNode.className !== 'xd665xh x10l6tqk x1dquyif') {
         if (contentNode.hasChildNodes()) {
             let text = '';
-            contentNode.childNodes.forEach((element) => {
-                if (
-                    element.className ===
-                        'html-div xdj266r x11i5rnm x1mh8g0r x18d9i69 x1cy8zhl x78zum5 x1q0g3np xod5an3 xz9dl7a x1ye3gou xn6708d' ||
-                    element.className === 'xabvvm4 xeyy32k x1ia1hqs x1a2w583 x6ikm8r x10wlt62' ||
-                    element.className ===
-                        'html-div xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6'
-                )
+            contentNode.childNodes.forEach((element) => {  
+                // refactor with find array
+                const ignoreClasses = [
+                    'x1rg5ohu x1n2onr6 xs7f9wi',
+                    'x9f619 x1n2onr6 x1ja2u2z x78zum5 xdt5ytf x2lah0s x193iq5w',
+                    'html-div xdj266r x14z9mp xat24cr x1lziwak xexx8yu xyri2b x18d9i69 x1c1uobl xh8yej3',
+                    'html-div xdj266r x14z9mp x1lziwak x18d9i69 x1cy8zhl x78zum5 x1q0g3np xod5an3 xz9dl7a x1g0dm76 xpdmqnj',
+                    'html-div xdj266r x11i5rnm x1mh8g0r x18d9i69 x1cy8zhl x78zum5 x1q0g3np xod5an3 xz9dl7a x1ye3gou xn6708d',
+                    'xabvvm4 xeyy32k x1ia1hqs x1a2w583 x6ikm8r x10wlt62',
+                    'html-div xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6',
+                ];
+                const isAorSVG = element.tagName === 'A' || element.tagName === 'SVG';
+                const isAriaHiddenSpan = element.tagName === 'SPAN' && element.getAttribute('aria-hidden') === 'true';
+                if (isAorSVG || isAriaHiddenSpan) {
                     return;
+                }
+                // Check if the element's className matches any of the ignore classes
+                if (ignoreClasses.includes(element.className)) {
+                    return;
+                }           
                 text += getContentText(element);
             });
 
@@ -1394,7 +1410,7 @@ const getContentText = (contentNode) => {
             return text;
         } else if (!contentNode.hasChildNodes() && contentNode.tagName == 'BR') {
             return '\n';
-        } else {
+        } else {    
             return contentNode.textContent;
         }
     }
