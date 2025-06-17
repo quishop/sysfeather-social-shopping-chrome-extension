@@ -220,7 +220,7 @@ function getGroupIDFromMeta(str) {
 
 export function getGroupID() {
     let groupId = '';
-    const searchStrings = ["{'groupID':'", '"groupID":"', '"group_id":', "'group_id':"];
+    const searchStrings = ["{'groupID':'", '"groupID":"', `"group_id":`, `'group_id':`];
     try {
         for (const str of searchStrings) {
             if (groupId) {
@@ -230,9 +230,9 @@ export function getGroupID() {
             if (!groupId) {
                 groupId = getGroupIDFromMeta(str);
             }
-            if (!groupId) {
-                groupId = window.location.href.split('groups/')[1].split('/')[0];
-            }
+        }
+        if (!groupId) {
+            groupId = window.location.href.split('groups/')[1].split('/')[0];
         }
     } catch (error) {
         console.error(error);
@@ -281,7 +281,10 @@ export function getTargetDomFromDocumentScripts(str) {
 
     for (let i = 0; i < documentScripts.length; i++) {
         let scriptDom = documentScripts[i];
+        console.log('scriptDomtextContent:' , scriptDom.textContent);
+        
         let start = scriptDom.textContent.indexOf(str);
+        console.log(start);
         if (start !== -1) return scriptDom;
     }
 
@@ -412,6 +415,7 @@ export function extractUserStringByBottomUser(scriptString) {
 }
 
 export async function fetchComments() {
+    
     const targetElementLength = getTargetPostClassFromDocumentBody().length;
     const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
 
@@ -419,13 +423,15 @@ export async function fetchComments() {
     if (targetElement)
         for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
             const pagePostCommitDiv = targetElement.querySelector(pagePostCommitClass);
+            console.log('pagePostCommitDiv',pagePostCommitDiv);
+            
             if (pagePostCommitDiv) {
                 node = pagePostCommitDiv;
                 break;
             }
         }
 
-    const comments = await fetchCommentsList(node);
+    const comments = await fetchCommentsList(node);    
     if (comments) return comments;
 }
 
@@ -454,6 +460,7 @@ export async function fetchCommentsList(node) {
             oneComments.push(item);
         })
     }
+console.log('oneComments:', oneComments.length, oneComments);
 
     if (oneComments) {
         let curCommentsList = [];
@@ -1114,11 +1121,11 @@ export function fetchByCommentsListNode(fetchData) {
  * @returns
  */
 export function findImageUrl(node) {
-    // Locate the element that contains the image URL using its class or other distinctive attributes
+    // Locate the element that contains the image URL using its class or other distinctive attributes    
     const imageElement = node.querySelector(
         'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xa49m3k.xqeqjp1.x2hbi6w.x13fuv20.xu3j5b3.x1q0q8m5.x26u7qi.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xdl72j9.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1a2a7pz',
-    ) || node.querySelector('a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz');
-
+    ) || node.querySelector('a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz') || node.querySelector('a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1fmog5m.xu25z0z.x140muxe.xo1y3bh.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz');
+    
     if (imageElement) {
         // Extract the URL from the 'xlink:href' attribute of the <image> tag inside the <svg>
         const svgImage = imageElement.querySelector('svg > g > image');
@@ -1384,6 +1391,10 @@ const getContentText = (contentNode) => {
             contentNode.childNodes.forEach((element) => {  
                 // refactor with find array
                 const ignoreClasses = [
+                    'xdj266r x14z9mp xat24cr x1lziwak x1vvkbs',
+                    'x193iq5w xeuugli x13faqbe x1vvkbs xlh3980 xvmahel x1n0sxbx x6prxxf xvq8zen xo1l8bm xi81zsa',
+                    'x6zurak x18bv5gf x193iq5w xeuugli x13faqbe x1vvkbs xt0psk2 xi81zsa xlh3980 xvmahel x1x9mg3 xo1l8bm',
+                    'x1i10hfl xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x14z9mp xat24cr x1lziwak xexx8yu xyri2b x18d9i69 x1c1uobl x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1heor9g xkrqix3 x1sur9pj x1s688f',
                     'x1rg5ohu x1n2onr6 xs7f9wi',
                     'x9f619 x1n2onr6 x1ja2u2z x78zum5 xdt5ytf x2lah0s x193iq5w',
                     'html-div xdj266r x14z9mp xat24cr x1lziwak xexx8yu xyri2b x18d9i69 x1c1uobl xh8yej3',
@@ -1392,9 +1403,14 @@ const getContentText = (contentNode) => {
                     'xabvvm4 xeyy32k x1ia1hqs x1a2w583 x6ikm8r x10wlt62',
                     'html-div xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6',
                 ];
+                const isCommentNode = element.nodeType === 8;
+                if (isCommentNode) {
+                    return;
+                }
                 const isAorSVG = element.tagName === 'A' || element.tagName === 'SVG';
-                const isAriaHiddenSpan = element.tagName === 'SPAN' && element.getAttribute('aria-hidden') === 'true';
-                if (isAorSVG || isAriaHiddenSpan) {
+                const isAriaHiddenSpan = element.tagName === 'SPAN' && element.getAttribute('aria-hidden') === 'true';                
+                const isButton = (element.tagName === 'SPAN' || element.tagName === 'DIV') && element.getAttribute('role') === 'button'
+                if (isAorSVG || isAriaHiddenSpan || isButton) {
                     return;
                 }
                 // Check if the element's className matches any of the ignore classes
@@ -1410,7 +1426,7 @@ const getContentText = (contentNode) => {
             return text;
         } else if (!contentNode.hasChildNodes() && contentNode.tagName == 'BR') {
             return '\n';
-        } else {    
+        } else {
             return contentNode.textContent;
         }
     }

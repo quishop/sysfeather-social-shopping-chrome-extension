@@ -308,6 +308,7 @@ let classTable: any = {
     ],
 
     pagePostCommitDiv: [
+        'x15mokao x1ga7v0g xde0f50 x15x8krk x6ikm8r x10wlt62',
         'xwya9rg x11i5rnm x1e56ztr x1mh8g0r xh8yej3',
         // 原結構：div > div > div
         'x10wlt62 x6ikm8r x9jhf4c x30kzoy x13lgxp2 x168nmei',
