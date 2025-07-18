@@ -7,13 +7,41 @@ import { classTable } from './ClassTable';
 import { htmlTable } from './HtmlTable';
 
 // Intercept fetch requests
+
+
+
 try {
-    if (isFacebookPostUrl(window.location.href)) {
+
+    function renderActionPanel () {
         const div = document.createElement('div');
+        div.setAttribute('id', ACTION_PANEL_ID);
         document.body.appendChild(div);
         const root = createRoot(div);
         root.render(<ActionPanel />);
-    }
+    };
+
+    const ACTION_PANEL_ID = 'sysfeather-plus-one-extension-action-panel';
+    let as = document.querySelector('body').querySelectorAll('a');
+    
+    
+    if (isFacebookPostUrl(window.location.href)) {
+        renderActionPanel();
+    };
+
+    as.forEach((item) => {
+        item.addEventListener('click', (e) => {
+            const link = item.getAttribute('href');            
+            if (isFacebookPostUrl(link)) {
+                console.log('Facebook post URL detected:', link);
+                if (document.querySelector(`#${ACTION_PANEL_ID}`)) {
+                    // 如果已經存在 ActionPanel，則不需要重新渲染
+                    return;
+                }
+                renderActionPanel();
+            }
+        });
+    });
+
 } catch (e) {
     console.log('error:', e);
 }
@@ -77,11 +105,12 @@ export async function getPostOwner() {
             }
         }
     }
-    const postOwnerLinks = targetElement.querySelectorAll('a.x1i10hfl.xjbqb8w.x1ejq31n.x18oe1m7.x1sy0etr.xstzfhl.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.xkrqix3.x1sur9pj.x1s688f');
-    
+    const postOwnerLinks = targetElement.querySelectorAll(
+        'a.x1i10hfl.xjbqb8w.x1ejq31n.x18oe1m7.x1sy0etr.xstzfhl.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.xkrqix3.x1sur9pj.x1s688f',
+    );
+
     let postOwnerName = null;
     for (const link of postOwnerLinks) {
-        
         const text = link.textContent;
         if (text && text !== '') {
             postOwnerName = text;
@@ -281,10 +310,8 @@ export function getTargetDomFromDocumentScripts(str) {
 
     for (let i = 0; i < documentScripts.length; i++) {
         let scriptDom = documentScripts[i];
-        console.log('scriptDomtextContent:' , scriptDom.textContent);
-        
+
         let start = scriptDom.textContent.indexOf(str);
-        console.log(start);
         if (start !== -1) return scriptDom;
     }
 
@@ -415,7 +442,6 @@ export function extractUserStringByBottomUser(scriptString) {
 }
 
 export async function fetchComments() {
-    
     const targetElementLength = getTargetPostClassFromDocumentBody().length;
     const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
 
@@ -423,15 +449,16 @@ export async function fetchComments() {
     if (targetElement)
         for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
             const pagePostCommitDiv = targetElement.querySelector(pagePostCommitClass);
-            console.log('pagePostCommitDiv',pagePostCommitDiv);
-            
+
             if (pagePostCommitDiv) {
                 node = pagePostCommitDiv;
                 break;
             }
         }
-
-    const comments = await fetchCommentsList(node);    
+    await new Promise((resolve) => {
+        resolve(check(node, resolve));
+    });
+    const comments = await fetchCommentsList(node);
     if (comments) return comments;
 }
 
@@ -443,7 +470,7 @@ export async function fetchCommentsList(node) {
 
     var unorderedList = node.querySelector('ul:not([class])');
 
-    let check_style = true;    
+    let check_style = true;
     if (unorderedList) {
     } else {
         for (const commentDiv of classTable.CommentDiv) {
@@ -458,9 +485,8 @@ export async function fetchCommentsList(node) {
     for (const OneCommentDiv of classTable.OneCommentDiv) {
         Array.from(unorderedList.querySelectorAll('div' + OneCommentDiv)).forEach((item) => {
             oneComments.push(item);
-        })
+        });
     }
-console.log('oneComments:', oneComments.length, oneComments);
 
     if (oneComments) {
         let curCommentsList = [];
@@ -468,62 +494,57 @@ console.log('oneComments:', oneComments.length, oneComments);
         oneComments.forEach((item, index) => {
             curCommentsList.push(item);
         });
-        const hasMore = await check(node, null);
 
-        if (hasMore) {
-            return fetchCommentsList(node);
-        } else {
-            let res = [];
-            // curCommentsList = curCommentsList.filter((item) => {
-            //     return (
-            //         item.classList.contains('x169t7cy') &&
-            //         item.classList.contains('x19f6ikt') &&
-            //         item.classList.length === 2
-            //     );
-            // });           
-             
-            curCommentsList.forEach((item, index) => {
-                // let filteredChildren = [];
-                // for (const FilteredChildren of classTable.FilteredChildren) {
-                //     filteredChildren = item.querySelectorAll('div' + FilteredChildren);
-                //     if (filteredChildren.length > 0) {
-                //         break;
-                //     }
-                // }
-                const itemLink = item.querySelector('a');
-                if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
-                    let fbNameUrl = item.querySelector('a').href;
-                    const commentUrlAndTime = getCommentUrlFromCommentTimeByCommentNode(item);
-                    const comment = {
-                        message: getCommentMessage(1, item),
-                        url: commentUrlAndTime.commentUrl,
-                        id: getCommentId(1, commentUrlAndTime.commentUrl),
-                        time: commentUrlAndTime.commentTime,
-                        author: {
-                            name: getCommenterName(1, item),
-                            id: getCommentInfoObj(1, fbNameUrl).id,
-                            avata: findImageUrl(item),
-                        },
-                    };
-                    
-                    res.push(comment);
-                }
-                
-            });
+        let res = [];
+        // curCommentsList = curCommentsList.filter((item) => {
+        //     return (
+        //         item.classList.contains('x169t7cy') &&
+        //         item.classList.contains('x19f6ikt') &&
+        //         item.classList.length === 2
+        //     );
+        // });
+        console.log('curCommentsList:', curCommentsList.length);
 
-            const filteredArray = [];
-            const idSet = new Set();
+        curCommentsList.forEach((item, index) => {
+            // let filteredChildren = [];
+            // for (const FilteredChildren of classTable.FilteredChildren) {
+            //     filteredChildren = item.querySelectorAll('div' + FilteredChildren);
+            //     if (filteredChildren.length > 0) {
+            //         break;
+            //     }
+            // }
+            const itemLink = item.querySelector('a');
+            if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
+                let fbNameUrl = item.querySelector('a').href;
+                const commentUrlAndTime = getCommentUrlFromCommentTimeByCommentNode(item);
+                const comment = {
+                    message: getCommentMessage(1, item),
+                    url: commentUrlAndTime.commentUrl,
+                    id: getCommentId(1, commentUrlAndTime.commentUrl),
+                    time: commentUrlAndTime.commentTime,
+                    author: {
+                        name: getCommenterName(1, item),
+                        id: getCommentInfoObj(1, fbNameUrl).id,
+                        avata: findImageUrl(item),
+                    },
+                };
 
-            res.forEach((obj) => {
-                if (!idSet.has(obj.id)) {
-                    idSet.add(obj.id);
-                    filteredArray.push(obj);
-                }
-            });
-            res = filteredArray;
+                res.push(comment);
+            }
+        });
 
-            return res;
-        }
+        const filteredArray = [];
+        const idSet = new Set();
+
+        res.forEach((obj) => {
+            if (!idSet.has(obj.id)) {
+                idSet.add(obj.id);
+                filteredArray.push(obj);
+            }
+        });
+        res = filteredArray;
+
+        return res;
     }
 }
 
@@ -552,7 +573,12 @@ export async function wait(ms) {
 
 export async function check(node, resolve) {
     await wait(1000);
-
+    const isNotInAllCommit = await checkIsInAllCommit(node);
+    console.log('isNotInAllCommit:', isNotInAllCommit);
+    
+    if (isNotInAllCommit) {
+        await wait(1000);
+    }
     // //if (is_load) return;
     // if (len >= STOP_COMMENT_LENGTH) return;
 
@@ -564,18 +590,19 @@ export async function check(node, resolve) {
     //     }
     // }
     await wait(2000);
+    let scrollMoreStatus = scrollToBottomAndCheckMore();
     let checkMoreStatus = clickcheckMore(node);
     let clickMoreStatus = clickMoreCommit(node);
 
     // if (checkMoreStatus && checkMoreStatus == clickMoreStatus) {
-    if (checkMoreStatus && checkMoreStatus !== clickMoreStatus) {
+    if ((checkMoreStatus && checkMoreStatus !== clickMoreStatus) || scrollMoreStatus) {
         //找留言列表準備抓留言內容
         //if (is_load) return;
         await wait(2000);
-        return true;
+        return check(node, resolve);
         // fetchCommentsList(node);
     }
-    return false;
+    resolve();
 
     // // 留言數量超過STOP_COMMENT_LENGTH 就匯入更新貼文
     // if (len >= STOP_COMMENT_LENGTH) {
@@ -596,6 +623,37 @@ export async function check(node, resolve) {
     //         fetchCommit(resolve);
     //     }
     // }
+}
+
+// 檢查留言列表是否在所有留言
+export async function checkIsInAllCommit(nodes) {
+    let result = false;
+    const selectors = classTable.postCommitModeButton;
+    for (const selector of selectors) {
+        const elements = nodes.querySelectorAll(selector);
+        
+        for (const element of elements) {
+            const content = element.textContent;            
+            if (content && content.includes('最相關') || content.includes('由新到舊')) {
+                // 如果有找到符合的按鈕，則返回false，表示不在所有留言
+                element.click();
+                await wait(100);
+                const menuItemsSelectors = classTable.commitModeMenuItems;
+                menuItemsSelectors.forEach((menuSelector) => {
+                    const menuItems = document.querySelectorAll(menuSelector);
+                    console.log('menuItems', menuItems);
+                    
+                    menuItems.forEach((item) => {
+                        if (item.textContent.includes('所有留言')) {
+                            item.click();
+                            result = true;
+                        }
+                    });
+                });
+            }
+        }
+    }
+    return result;
 }
 
 // 檢查是否還有更多留言按鈕。
@@ -690,6 +748,31 @@ export function clickMoreCommit(nodes) {
         return true;
     }
     return false;
+}
+
+// 捲動至視窗最底下，檢查是否還有更多留言正在載入
+export function scrollToBottomAndCheckMore() {
+    let result = false;
+    const postElementSelectors = classTable.post;
+    for (const selector of postElementSelectors) {
+        const postElements = document.querySelectorAll(selector);
+        if (postElements.length > 0) {
+            const el = postElements[0];
+            const recentHeight = el.scrollHeight;
+            el.scrollTo({ top: recentHeight, behavior: 'instant' });
+            const updatedHeight = el.scrollHeight;
+            wait(1000); // 等待一段時間以確保內容載入
+            if (updatedHeight > recentHeight) {
+                // 有更多內容被載入
+                result = true;
+                return true;
+            } else {
+                // 沒有更多留言
+                return false;
+            }
+        }
+    }
+    return result;
 }
 
 /**
@@ -798,7 +881,7 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
         tmpPostTime = commentNode.querySelector(element);
         if (tmpPostTime) break;
     }
-    
+
     let commentTime = 'unknown';
     if (tmpPostTime) {
         commentUrl = findFirstAnchorTag(tmpPostTime);
@@ -1121,11 +1204,18 @@ export function fetchByCommentsListNode(fetchData) {
  * @returns
  */
 export function findImageUrl(node) {
-    // Locate the element that contains the image URL using its class or other distinctive attributes    
-    const imageElement = node.querySelector(
-        'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xa49m3k.xqeqjp1.x2hbi6w.x13fuv20.xu3j5b3.x1q0q8m5.x26u7qi.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xdl72j9.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1a2a7pz',
-    ) || node.querySelector('a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz') || node.querySelector('a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1fmog5m.xu25z0z.x140muxe.xo1y3bh.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz');
-    
+    // Locate the element that contains the image URL using its class or other distinctive attributes
+    const imageElement =
+        node.querySelector(
+            'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xa49m3k.xqeqjp1.x2hbi6w.x13fuv20.xu3j5b3.x1q0q8m5.x26u7qi.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xdl72j9.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1a2a7pz',
+        ) ||
+        node.querySelector(
+            'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz',
+        ) ||
+        node.querySelector(
+            'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1fmog5m.xu25z0z.x140muxe.xo1y3bh.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz',
+        );
+
     if (imageElement) {
         // Extract the URL from the 'xlink:href' attribute of the <image> tag inside the <svg>
         const svgImage = imageElement.querySelector('svg > g > image');
@@ -1364,7 +1454,7 @@ async function getPostNumFromHeader() {
 export const content = (selector) => {
     const targetNode =
         getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1]
-            .parentNode.parentNode;    
+            .parentNode.parentNode;
     if (targetNode) {
         let contentNodes = targetNode.childNodes[0].querySelector(selector);
     }
@@ -1374,7 +1464,7 @@ export const content = (selector) => {
 export const getContentFn = () => {
     for (let i = 0; i < classTable.postContent.length; i++) {
         let contentElement = classTable.postContent[i];
-        const text = content(contentElement);        
+        const text = content(contentElement);
         if (text && text.trim() != '點擊可標註商品') {
             return text;
         }
@@ -1384,11 +1474,10 @@ export const getContentFn = () => {
 };
 
 const getContentText = (contentNode) => {
-    
     if (contentNode !== null && contentNode.className !== 'xd665xh x10l6tqk x1dquyif') {
         if (contentNode.hasChildNodes()) {
             let text = '';
-            contentNode.childNodes.forEach((element) => {  
+            contentNode.childNodes.forEach((element) => {
                 // refactor with find array
                 const ignoreClasses = [
                     'xdj266r x14z9mp xat24cr x1lziwak x1vvkbs',
@@ -1408,15 +1497,18 @@ const getContentText = (contentNode) => {
                     return;
                 }
                 const isAorSVG = element.tagName === 'A' || element.tagName === 'SVG';
-                const isAriaHiddenSpan = element.tagName === 'SPAN' && element.getAttribute('aria-hidden') === 'true';                
-                const isButton = (element.tagName === 'SPAN' || element.tagName === 'DIV') && element.getAttribute('role') === 'button'
+                const isAriaHiddenSpan =
+                    element.tagName === 'SPAN' && element.getAttribute('aria-hidden') === 'true';
+                const isButton =
+                    (element.tagName === 'SPAN' || element.tagName === 'DIV') &&
+                    element.getAttribute('role') === 'button';
                 if (isAorSVG || isAriaHiddenSpan || isButton) {
                     return;
                 }
                 // Check if the element's className matches any of the ignore classes
                 if (ignoreClasses.includes(element.className)) {
                     return;
-                }           
+                }
                 text += getContentText(element);
             });
 

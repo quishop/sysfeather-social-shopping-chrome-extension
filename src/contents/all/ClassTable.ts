@@ -1,4 +1,4 @@
-let classTable: any = {
+const classTable: any = {
     author: [
         'oajrlxb2 g5ia77u1 qu0x051f esr5mh6w e9989ue4 r7d6kgcz rq0escxv nhd2j8a9 j83agx80 p7hjln8o kvgmc6g5 cxmmr5t8 oygrvhab hcukyx3x jb3vyjys d1544ag0 qt6c0cv9 tw6a2znq i1ao9s8h esuyzwwr f1sip0of lzcic4wl l9j0dhe7 abiwlrkh p8dawk7l bp9cbjyn e72ty7fz qlfml3jp inkptoze qmr60zad btwxx1t3 tv7at329 taijpn5t k4urcfbm',
         'x6s0dn4 x78zum5 x5yr21d xl56j7k x1emribx xfff67h xu1161g x12ca73t x5vlmd',
@@ -15,7 +15,10 @@ let classTable: any = {
         'x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1heor9g xt0b8zv x1xlr1w8',
     ],
 
-    //貼文列表
+    // 貼文
+    post: ['xb57i2i.x1q594ok.x5lxg6s.x78zum5.xdt5ytf.x6ikm8r.x1ja2u2z.x1pq812k.x1rohswg.xfk6m8.x1yqm8si.xjx87ck.xx8ngbg.xwo3gff.x1n2onr6.x1oyok0e.x1odjw0f.x1iyjqo2.xy5w88m'],
+
+    // 貼文列表
     postList: [
         'x9f619 x1n2onr6 x1ja2u2z xeuugli xs83m0k x1xmf6yo x1emribx x1e56ztr x1i64zmx xjl7jj x19h7ccj xu9j1y6 x7ep2pv',
     ],
@@ -111,7 +114,14 @@ let classTable: any = {
     postViewCommitLoad: [
         'oajrlxb2 bp9cbjyn g5ia77u1 mtkw9kbi tlpljxtp qensuy8j ppp5ayq2 goun2846 ccm00jje s44p3ltw mk2mc5f4 rt8b4zig n8ej3o3l agehan2d sk4xxmp2 rq0escxv e3zaq2ox pq6dq46d mg4g778l btwxx1t3 g5gj957u p7hjln8o kvgmc6g5 cxmmr5t8 oygrvhab hcukyx3x tgvbjcpo hpfvmrgz jb3vyjys p8fzw8mz qt6c0cv9 a8nywdso l9j0dhe7 i1ao9s8h esuyzwwr f1sip0of du4w35lb lzcic4wl abiwlrkh gpro0wi8 m9osqain buofh1pr',
     ],
-
+    // 留言列表顯示方式按鈕
+    postCommitModeButton: [
+        'x1i10hfl xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x14z9mp xat24cr x1lziwak xexx8yu xyri2b x18d9i69 x1c1uobl x16tdsg8 x1hl2dhg xggy1nq x1fmog5m xu25z0z x140muxe xo1y3bh x1n2onr6 x87ps6o x1lku1pv x1a2a7pz',
+    ],
+    // 留言列表顯示方式選單項目
+    commitModeMenuItems: [
+        'x1i10hfl xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd xe8uvvx x1hl2dhg xggy1nq x1fmog5m xu25z0z x140muxe xo1y3bh x87ps6o x1lku1pv x1a2a7pz xjyslct x9f619 x1ypdohk x78zum5 x1q0g3np x2lah0s x1i6fsjq xfvfia3 x8e7100 x1a16bkn x10wwi4t x1x7e7qh xgm7xcn x1ynn3ck x1n2onr6 x16tdsg8 x1ja2u2z x6s0dn4'
+    ],
     // 留言時間
     // 透過留言時間可以拿到貼文url
     commentTime: [
@@ -156,7 +166,7 @@ let classTable: any = {
         /* windows */ 'x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x xudqn12 x3x7a5m x6prxxf xvq8zen xo1l8bm xi81zsa',
     ],
 
-    //一個留言的區塊
+    // 一個留言的區塊
     postCommitNode: [
         'tw6a2znq sj5x9vvc d1544ag0 cxgpxx05',
         'jg3vgc78 cgu29s5g lq84ybu9 hf30pyar r227ecj6',
@@ -232,7 +242,7 @@ let classTable: any = {
         'x18xomjl xbcz3fp',
 
     ],
-    //每一個留言的DIV
+    // 每一個留言的DIV
     OneCommentDiv: [
         // 原結構：div > div
         // 'x78zum5 xdt5ytf',
@@ -242,7 +252,7 @@ let classTable: any = {
         'x1n2onr6 x135b78x x1iorvi4 x78zum5 x1q0g3np x1a2a7pz'
     ],
 
-    //每一個留言的DIV
+    // 每一個留言的DIV
     OneCommentNodeDiv: [
         // 原結構：div > div
         // 'x78zum5 xdt5ytf',
@@ -287,18 +297,18 @@ let classTable: any = {
         'x6s0dn4 x78zum5 xdj266r x11i5rnm xat24cr x1mh8g0r xe0p6wg',
     ],
 
-    //粉絲頁貼文列表
+    // 粉絲頁貼文列表
     pagePostList: [
         'x9f619 x1n2onr6 x1ja2u2z xeuugli xs83m0k x1xmf6yo x1emribx x1e56ztr x1i64zmx xjl7jj x19h7ccj xu9j1y6 x7ep2pv',
         'x6s0dn4 x78zum5 xdt5ytf x193iq5w x1t2pt76 xh8yej3',
-        'x2bj2ny x78zum5 xds687c xdt5ytf xnjgh8c xixxii4 x1qrby5j xjabf5u xfmqk8h xxzkxad', //這個是直接監控直播貼文
+        'x2bj2ny x78zum5 xds687c xdt5ytf xnjgh8c xixxii4 x1qrby5j xjabf5u xfmqk8h xxzkxad', // 這個是直接監控直播貼文
     ],
 
     // //page class
     pagePostClass: [
         // 原結構：div > div
         'x1cy8zhl x78zum5 x1q0g3np xod5an3 x1pi30zi x1swvt13 xz9dl7a',
-        //page Live Header
+        // page Live Header
         'x78zum5 xdt5ytf x2lah0s xyamay9 x1pi30zi x18d9i69 x1swvt13',
     ],
 
@@ -330,7 +340,7 @@ let classTable: any = {
     ],
 
     page_name: [
-        //"x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz xt0b8zv xzsf02u x1s688f",
+        // "x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz xt0b8zv xzsf02u x1s688f",
         'x193iq5w xeuugli x13faqbe x1vvkbs xlh3980 xvmahel x1n0sxbx x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x3x7a5m x6prxxf xvq8zen xo1l8bm xi81zsa x1yc453h',
     ],
 
@@ -491,7 +501,6 @@ initial();
 function initial() {
     for (const key in classTable) {
         classTable[key].forEach((el: any, index: any) => {
-            console.log(el);
             classTable[key][index] = '.' + classTable[key][index].replaceAll(' ', '.');
         });
     }
