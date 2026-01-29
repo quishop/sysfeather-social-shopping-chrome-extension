@@ -105,18 +105,23 @@ export async function getPostOwner() {
             }
         }
     }
-    const postOwnerLinks = targetElement.querySelectorAll(
-        'a.x1i10hfl.xjbqb8w.x1ejq31n.x18oe1m7.x1sy0etr.xstzfhl.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.xkrqix3.x1sur9pj.x1s688f',
-    );
-
     let postOwnerName = null;
-    for (const link of postOwnerLinks) {
-        const text = link.textContent;
-        if (text && text !== '') {
-            postOwnerName = text;
+    
+    for (const item of classTable.postOwnerList) {
+        const links = targetElement.querySelectorAll('a' + item);
+        for (const link of links) {
+            const text = link.textContent;
+            if (text && text !== '') {
+                postOwnerName = text;
+                postOwnerId = link.href.split('user/')[1].split('/')[0];
+                break;
+            }
+        }
+        if (postOwnerName !== null) {
             break;
         }
     }
+
     return { name: postOwnerName ?? '', id: postOwnerId };
 }
 
@@ -487,7 +492,7 @@ export async function fetchCommentsList(node) {
             oneComments.push(item);
         });
     }
-
+    
     if (oneComments) {
         let curCommentsList = [];
 
@@ -503,8 +508,6 @@ export async function fetchCommentsList(node) {
         //         item.classList.length === 2
         //     );
         // });
-        console.log('curCommentsList:', curCommentsList.length);
-
         curCommentsList.forEach((item, index) => {
             // let filteredChildren = [];
             // for (const FilteredChildren of classTable.FilteredChildren) {
@@ -513,7 +516,7 @@ export async function fetchCommentsList(node) {
             //         break;
             //     }
             // }
-            const itemLink = item.querySelector('a');
+            const itemLink = item.querySelector('a');            
             if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
                 let fbNameUrl = item.querySelector('a').href;
                 const commentUrlAndTime = getCommentUrlFromCommentTimeByCommentNode(item);
@@ -543,7 +546,7 @@ export async function fetchCommentsList(node) {
             }
         });
         res = filteredArray;
-
+        
         return res;
     }
 }
@@ -573,9 +576,7 @@ export async function wait(ms) {
 
 export async function check(node, resolve) {
     await wait(1000);
-    const isNotInAllCommit = await checkIsInAllCommit(node);
-    console.log('isNotInAllCommit:', isNotInAllCommit);
-    
+    const isNotInAllCommit = await checkIsInAllCommit(node);    
     if (isNotInAllCommit) {
         await wait(1000);
     }
@@ -640,9 +641,7 @@ export async function checkIsInAllCommit(nodes) {
                 await wait(100);
                 const menuItemsSelectors = classTable.commitModeMenuItems;
                 menuItemsSelectors.forEach((menuSelector) => {
-                    const menuItems = document.querySelectorAll(menuSelector);
-                    console.log('menuItems', menuItems);
-                    
+                    const menuItems = document.querySelectorAll(menuSelector);                    
                     menuItems.forEach((item) => {
                         if (item.textContent.includes('所有留言')) {
                             item.click();
@@ -846,16 +845,14 @@ export function getCommenterIdAndNicknameFromNameUrl(fbNameUrl) {
     let commenter = {
         id: '',
         nickname: '',
-    };
-
+    };    
     if (fbNameUrl.indexOf('user') != '-1') {
         commenter.id = fbNameUrl.split('user')[1].split('/')[1];
     } else if (fbNameUrl.indexOf('profile.php?') != '-1') {
         commenter.id = fbNameUrl.split('id=')[1].split('&__cft__')[0];
     } else {
         commenter.nickname = fbNameUrl.split('?__cft__')[0].replace('https://www.facebook.com', '');
-    }
-
+    }    
     return commenter;
 }
 
@@ -872,7 +869,7 @@ export function getCommentMsgNodeByCommitCommentNode(commitCommentNode) {
 }
 
 //從留言的時間超連結找出留言url
-export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
+export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {    
     let commentUrl = '';
     //找留言時間的dom
     let tmpPostTime = null;
@@ -1178,13 +1175,12 @@ export function getCommentId(funcType, commentUrl) {
 }
 
 export function getCommentIdByUrlSplitWord(url) {
-    let id;
-
+    let id;    
     if (url.indexOf('&reply_comment_id=') != -1) {
         id = url.split('&reply_comment_id=')[1].split('&')[0];
     } else if (url.indexOf('?comment_id=') !== -1) {
         id = url.split('?comment_id=')[1].split('&')[0];
-    }
+    }    
     return id;
 }
 
@@ -1206,6 +1202,9 @@ export function fetchByCommentsListNode(fetchData) {
 export function findImageUrl(node) {
     // Locate the element that contains the image URL using its class or other distinctive attributes
     const imageElement =
+        node.querySelector(
+            'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.x3ct3a4.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1fmog5m.xu25z0z.x140muxe.xo1y3bh.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz',
+        ) ||
         node.querySelector(
             'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xa49m3k.xqeqjp1.x2hbi6w.x13fuv20.xu3j5b3.x1q0q8m5.x26u7qi.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xdl72j9.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1a2a7pz',
         ) ||
@@ -1310,7 +1309,6 @@ export function getHeader(i) {
             header = node.querySelector(".buofh1pr").querySelectorAll(".qzhwtbm6.knvmm38d")[i].querySelector("a")
           }
     */
-    console.log('header:', header);
 
     return header;
 }
@@ -1455,6 +1453,9 @@ export const content = (selector) => {
     const targetNode =
         getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1]
             .parentNode.parentNode;
+    console.log('targetNode', targetNode);
+    console.log('targetNode.childNodes', targetNode.childNodes[0]);
+    
     if (targetNode) {
         let contentNodes = targetNode.childNodes[0].querySelector(selector);
     }

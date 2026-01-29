@@ -22,17 +22,18 @@ const ActionPanel = () => {
 
         Promise.all([fetchPostNumInfo, fetchPostOwner, fetchCreationTime, fetchCommentList])
             .then((response) => {
+                const [postNumInfo, postOwner, creationTime, commentList] = response;
                 const data = {
                     group: {
                         name: '',
                         id: getGroupID(),
                     },
-                    author: response[1],
-                    createTime: new Date((response[2] as number) * 1000),
+                    author: postOwner,
+                    createTime: new Date((creationTime as number) * 1000),
 
-                    commentsLength: response[3]?.length || 0,
-                    post: response[0],
-                    comments: response[3],
+                    commentsLength: commentList?.length || 0,
+                    post: postNumInfo,
+                    comments: commentList,
                 };
                 console.log('data:', data);
                 chrome.runtime.sendMessage({ action: 'sendData', data: data }, (response) => {
