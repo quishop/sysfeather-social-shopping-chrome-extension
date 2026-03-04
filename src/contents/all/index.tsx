@@ -8,29 +8,25 @@ import { htmlTable } from './HtmlTable';
 
 // Intercept fetch requests
 
-
-
 try {
-
-    function renderActionPanel () {
+    function renderActionPanel() {
         const div = document.createElement('div');
         div.setAttribute('id', ACTION_PANEL_ID);
         document.body.appendChild(div);
         const root = createRoot(div);
         root.render(<ActionPanel />);
-    };
+    }
 
     const ACTION_PANEL_ID = 'sysfeather-plus-one-extension-action-panel';
     let as = document.querySelector('body').querySelectorAll('a');
-    
-    
+
     if (isFacebookPostUrl(window.location.href)) {
         renderActionPanel();
-    };
+    }
 
     as.forEach((item) => {
         item.addEventListener('click', (e) => {
-            const link = item.getAttribute('href');            
+            const link = item.getAttribute('href');
             if (isFacebookPostUrl(link)) {
                 console.log('Facebook post URL detected:', link);
                 if (document.querySelector(`#${ACTION_PANEL_ID}`)) {
@@ -41,7 +37,6 @@ try {
             }
         });
     });
-
 } catch (e) {
     console.log('error:', e);
 }
@@ -106,7 +101,7 @@ export async function getPostOwner() {
         }
     }
     let postOwnerName = null;
-    
+
     for (const item of classTable.postOwnerList) {
         const links = targetElement.querySelectorAll('a' + item);
         for (const link of links) {
@@ -492,7 +487,7 @@ export async function fetchCommentsList(node) {
             oneComments.push(item);
         });
     }
-    
+
     if (oneComments) {
         let curCommentsList = [];
 
@@ -516,7 +511,7 @@ export async function fetchCommentsList(node) {
             //         break;
             //     }
             // }
-            const itemLink = item.querySelector('a');            
+            const itemLink = item.querySelector('a');
             if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
                 let fbNameUrl = item.querySelector('a').href;
                 const commentUrlAndTime = getCommentUrlFromCommentTimeByCommentNode(item);
@@ -546,7 +541,7 @@ export async function fetchCommentsList(node) {
             }
         });
         res = filteredArray;
-        
+
         return res;
     }
 }
@@ -576,7 +571,7 @@ export async function wait(ms) {
 
 export async function check(node, resolve) {
     await wait(1000);
-    const isNotInAllCommit = await checkIsInAllCommit(node);    
+    const isNotInAllCommit = await checkIsInAllCommit(node);
     if (isNotInAllCommit) {
         await wait(1000);
     }
@@ -632,16 +627,16 @@ export async function checkIsInAllCommit(nodes) {
     const selectors = classTable.postCommitModeButton;
     for (const selector of selectors) {
         const elements = nodes.querySelectorAll(selector);
-        
+
         for (const element of elements) {
-            const content = element.textContent;            
-            if (content && content.includes('最相關') || content.includes('由新到舊')) {
+            const content = element.textContent;
+            if ((content && content.includes('最相關')) || content.includes('由新到舊')) {
                 // 如果有找到符合的按鈕，則返回false，表示不在所有留言
                 element.click();
                 await wait(100);
                 const menuItemsSelectors = classTable.commitModeMenuItems;
                 menuItemsSelectors.forEach((menuSelector) => {
-                    const menuItems = document.querySelectorAll(menuSelector);                    
+                    const menuItems = document.querySelectorAll(menuSelector);
                     menuItems.forEach((item) => {
                         if (item.textContent.includes('所有留言')) {
                             item.click();
@@ -845,14 +840,14 @@ export function getCommenterIdAndNicknameFromNameUrl(fbNameUrl) {
     let commenter = {
         id: '',
         nickname: '',
-    };    
+    };
     if (fbNameUrl.indexOf('user') != '-1') {
         commenter.id = fbNameUrl.split('user')[1].split('/')[1];
     } else if (fbNameUrl.indexOf('profile.php?') != '-1') {
         commenter.id = fbNameUrl.split('id=')[1].split('&__cft__')[0];
     } else {
         commenter.nickname = fbNameUrl.split('?__cft__')[0].replace('https://www.facebook.com', '');
-    }    
+    }
     return commenter;
 }
 
@@ -869,7 +864,7 @@ export function getCommentMsgNodeByCommitCommentNode(commitCommentNode) {
 }
 
 //從留言的時間超連結找出留言url
-export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {    
+export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
     let commentUrl = '';
     //找留言時間的dom
     let tmpPostTime = null;
@@ -1175,12 +1170,12 @@ export function getCommentId(funcType, commentUrl) {
 }
 
 export function getCommentIdByUrlSplitWord(url) {
-    let id;    
+    let id;
     if (url.indexOf('&reply_comment_id=') != -1) {
         id = url.split('&reply_comment_id=')[1].split('&')[0];
     } else if (url.indexOf('?comment_id=') !== -1) {
         id = url.split('?comment_id=')[1].split('&')[0];
-    }    
+    }
     return id;
 }
 
@@ -1313,19 +1308,21 @@ export function getHeader(i) {
     return header;
 }
 
-//取得社團名稱div資訊
-export async function getGroupNameClass() {
+//取得社團名稱
+export function getGroupNameClass() {
     let groupName = null;
+    const targetElementLength = getTargetPostClassFromDocumentBody().length;
+    const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
     //取社團名稱(用社團名稱超連結的CSS)
     /*
     /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div[1]/div[2]/div/div/div/div/div[1]/div/div/div/div[1]/div/div[1]/h1/span/a
     */
     for (let i = 0; i < classTable.group_name.length; i++) {
         const groupNameNode = classTable.group_name[i];
-        groupName = document.querySelector(groupNameNode);
+        groupName = targetElement.querySelector(groupNameNode);
         if (groupName) break;
     }
-    return groupName;
+    return groupName.textContent;
 }
 
 /**
@@ -1450,16 +1447,16 @@ async function getPostNumFromHeader() {
 }
 
 export const content = (selector) => {
-    const targetNode =
-        getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1]
-            .parentNode.parentNode;
-    console.log('targetNode', targetNode);
-    console.log('targetNode.childNodes', targetNode.childNodes[0]);
     
+    const targetNode =
+    getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1]
+    .parentNode.parentNode;
+
     if (targetNode) {
-        let contentNodes = targetNode.childNodes[0].querySelector(selector);
+        const targetNodeChildNode = targetNode.childNodes[0];
+        let contentNodes = targetNodeChildNode.nodeType === Node.COMMENT_NODE ?  targetNode.querySelector(selector) : targetNode.childNodes[0].querySelector(selector);
     }
-    return getContentText(targetNode.childNodes[0]);
+    return getContentText(targetNode);
 };
 
 export const getContentFn = () => {
@@ -1474,13 +1471,14 @@ export const getContentFn = () => {
     return '';
 };
 
-const getContentText = (contentNode) => {
+const getContentText = (contentNode) => {    
     if (contentNode !== null && contentNode.className !== 'xd665xh x10l6tqk x1dquyif') {
         if (contentNode.hasChildNodes()) {
             let text = '';
             contentNode.childNodes.forEach((element) => {
                 // refactor with find array
                 const ignoreClasses = [
+                    'x1lliihq xjkvuk6 x1iorvi4',
                     'xdj266r x14z9mp xat24cr x1lziwak x1vvkbs',
                     'x193iq5w xeuugli x13faqbe x1vvkbs xlh3980 xvmahel x1n0sxbx x6prxxf xvq8zen xo1l8bm xi81zsa',
                     'x6zurak x18bv5gf x193iq5w xeuugli x13faqbe x1vvkbs xt0psk2 xi81zsa xlh3980 xvmahel x1x9mg3 xo1l8bm',

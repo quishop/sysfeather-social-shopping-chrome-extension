@@ -7,6 +7,7 @@ import {
     getFBCommitLength,
     getPostNumInfo,
     getGroupID,
+    getGroupNameClass,
     fetchComments,
 } from '../../../all/index';
 const { Title } = Typography;
@@ -23,10 +24,13 @@ const ActionPanel = () => {
         Promise.all([fetchPostNumInfo, fetchPostOwner, fetchCreationTime, fetchCommentList])
             .then((response) => {
                 const [postNumInfo, postOwner, creationTime, commentList] = response;
+                
+                const groupID = getGroupID();
+                const groupName = getGroupNameClass();
                 const data = {
                     group: {
-                        name: '',
-                        id: getGroupID(),
+                        id: groupID,
+                        name: groupName,
                     },
                     author: postOwner,
                     createTime: new Date((creationTime as number) * 1000),
@@ -39,6 +43,30 @@ const ActionPanel = () => {
                 chrome.runtime.sendMessage({ action: 'sendData', data: data }, (response) => {
                     console.log('sendData:0', response.status);
                 });
+                new Promise(() => {
+                    return fetch(
+                        'https://azzmqyfake.execute-api.ap-northeast-1.amazonaws.com/prod/v1/usage-logs',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                socialAccount: {
+                                    platform: 'fb_group',
+                                    platformId: groupID,
+                                    name: groupName,
+                                },
+                                serviceCode: 'group_plus',
+                                featureCode: 'fetch_comments',
+                                action: 'fetch_comments',
+                            }),
+                        },
+                    );
+                }).then((res) => {
+                    console.log('log response:', res);
+                });
+
                 // sendMessage('hello-from-content-script', JSON.stringify(data), 'background');
             })
             .catch((e) => {
