@@ -22,7 +22,7 @@ const App = () => {
                 </Header>
                 <Content style={{ padding: '20px' }}>
                     <Title level={4}>社團貼文+1</Title>
-                    <Paragraph>請在以下格式網址導出社團貼文和留言：</Paragraph>
+                    <Paragraph>請在以下格式網址匯出社團貼文和留言：</Paragraph>
                     <List
                         bordered
                         dataSource={data}

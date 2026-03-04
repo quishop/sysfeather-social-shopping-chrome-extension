@@ -7,15 +7,37 @@ import { classTable } from './ClassTable';
 import { htmlTable } from './HtmlTable';
 
 // Intercept fetch requests
+
 try {
-    if (isFacebookPostUrl(window.location.href)) {
+    function renderActionPanel() {
         const div = document.createElement('div');
+        div.setAttribute('id', ACTION_PANEL_ID);
         document.body.appendChild(div);
         const root = createRoot(div);
         root.render(<ActionPanel />);
     }
+
+    const ACTION_PANEL_ID = 'sysfeather-plus-one-extension-action-panel';
+    let as = document.querySelector('body').querySelectorAll('a');
+
+    if (isFacebookPostUrl(window.location.href)) {
+        renderActionPanel();
+    }
+
+    as.forEach((item) => {
+        item.addEventListener('click', (e) => {
+            const link = item.getAttribute('href');
+            if (isFacebookPostUrl(link)) {
+                console.log('Facebook post URL detected:', link);
+                if (document.querySelector(`#${ACTION_PANEL_ID}`)) {
+                    // 如果已經存在 ActionPanel，則不需要重新渲染
+                    return;
+                }
+                renderActionPanel();
+            }
+        });
+    });
 } catch (e) {
-    console.log('error');
     console.log('error:', e);
 }
 
@@ -32,23 +54,20 @@ export async function switchContentState(node) {
         doCheckMoreComment = true;
     }
 
-    console.log('doCheckMoreComment:', textcontent, doCheckMoreComment);
     if (doCheckMoreComment) {
-        console.log('invoked');
         await commitstats.click();
         let selectCommitShowTmpBtn = getCommitSortListBtn(1);
-        console.log('selectCommitShowTmpBtn:', selectCommitShowTmpBtn);
         await selectCommitShowTmpBtn.click();
     }
 }
 
 function isFacebookPostUrl(url: string) {
     const regexPermalinkAndPost =
-        /^https:\/\/www\.facebook\.com\/groups\/[A-Za-z0-9_-]+\/permalink\/[0-9]+\/?$/;
-    const regexPost = /^https:\/\/www\.facebook\.com\/groups\/[A-Za-z0-9_-]+\/posts\/[0-9]+\/?$/;
+        /^https:\/\/www\.facebook\.com\/groups\/.+?\/permalink\/[0-9]+\/?$/;
+    const regexPost = /^https:\/\/www\.facebook\.com\/groups\/.+?\/posts\/[0-9]+\/?$/;
     const regrexPrivatePermalinkAndPost =
-        /https:\/\/www\.facebook\.com\/groups\/[a-zA-Z0-9]+\/permalink\/\d+\//;
-    const regrexPrivatePost = /https:\/\/www\.facebook\.com\/groups\/[a-zA-Z0-9]+\/posts\/\d+\//;
+        /https:\/\/www\.facebook\.com\/groups\/.+?\/permalink\/\d+\//;
+    const regrexPrivatePost = /https:\/\/www\.facebook\.com\/groups\/.+?\/posts\/\d+\//;
 
     const res =
         regexPermalinkAndPost.test(url) ||
@@ -62,7 +81,9 @@ function isFacebookPostUrl(url: string) {
 export async function getPostOwner() {
     let postOwnerId = '';
 
-    const targetElement = getTargetPostClassFromDocumentBody()[0];
+    const targetElementLength = getTargetPostClassFromDocumentBody().length;
+    const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
+
     let postHeaderClass = targetElement.querySelectorAll('div.xu06os2.x1ok221b a.x1i10hfl');
     for (let i = 0; i < postHeaderClass.length; i++) {
         if (postHeaderClass[i].href.search('user') != -1) {
@@ -79,11 +100,24 @@ export async function getPostOwner() {
             }
         }
     }
-    let postOwnerName = targetElement.querySelector(
-        'a.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1sur9pj.xkrqix3.xzsf02u.x1s688f',
-    );
+    let postOwnerName = null;
 
-    return { name: postOwnerName ? postOwnerName.textContent : '', id: postOwnerId };
+    for (const item of classTable.postOwnerList) {
+        const links = targetElement.querySelectorAll('a' + item);
+        for (const link of links) {
+            const text = link.textContent;
+            if (text && text !== '') {
+                postOwnerName = text;
+                postOwnerId = link.href.split('user/')[1].split('/')[0];
+                break;
+            }
+        }
+        if (postOwnerName !== null) {
+            break;
+        }
+    }
+
+    return { name: postOwnerName ?? '', id: postOwnerId };
 }
 
 /**
@@ -105,7 +139,8 @@ export async function getCreationTime(funcType: number) {
 // 取得FB顯示留言長度
 export function getFBCommitLength() {
     let commitClass;
-    const targetElement = getTargetPostClassFromDocumentBody()[0];
+    const targetElementLength = getTargetPostClassFromDocumentBody().length;
+    const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
     for (const postCommitDiv of classTable.postCommitDiv) {
         commitClass = targetElement.parentNode.parentNode.querySelector(postCommitDiv);
         if (commitClass) {
@@ -214,7 +249,7 @@ function getGroupIDFromMeta(str) {
 
 export function getGroupID() {
     let groupId = '';
-    const searchStrings = ["{'groupID':'", '"groupID":"'];
+    const searchStrings = ["{'groupID':'", '"groupID":"', `"group_id":`, `'group_id':`];
     try {
         for (const str of searchStrings) {
             if (groupId) {
@@ -224,6 +259,9 @@ export function getGroupID() {
             if (!groupId) {
                 groupId = getGroupIDFromMeta(str);
             }
+        }
+        if (!groupId) {
+            groupId = window.location.href.split('groups/')[1].split('/')[0];
         }
     } catch (error) {
         console.error(error);
@@ -244,7 +282,8 @@ function getGroupIDFromScript(domFetcher, str) {
 
     if (firstScript) {
         let start = firstScript.textContent.indexOf(str);
-        id = firstScript.textContent.substr(start + str.length).split('"')[0];
+        let splitStr = firstScript.textContent.substr(start + str.length).split('"');
+        id = splitStr[0] || splitStr[1];
     }
 
     return id;
@@ -271,6 +310,7 @@ export function getTargetDomFromDocumentScripts(str) {
 
     for (let i = 0; i < documentScripts.length; i++) {
         let scriptDom = documentScripts[i];
+
         let start = scriptDom.textContent.indexOf(str);
         if (start !== -1) return scriptDom;
     }
@@ -402,22 +442,23 @@ export function extractUserStringByBottomUser(scriptString) {
 }
 
 export async function fetchComments() {
-    const targetElement = getTargetPostClassFromDocumentBody()[0];
-    // let node = document.querySelector('body'); // this.postHeader
-    let target = targetElement.parentNode.parentNode; // this.postHeader
+    const targetElementLength = getTargetPostClassFromDocumentBody().length;
+    const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
+
     let node;
-    while (!node) {
+    if (targetElement)
         for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
-            const pagePostCommitDiv = target.querySelector(pagePostCommitClass);
+            const pagePostCommitDiv = targetElement.querySelector(pagePostCommitClass);
+
             if (pagePostCommitDiv) {
                 node = pagePostCommitDiv;
                 break;
             }
         }
-    }
-    console.log('node:', node);
+    await new Promise((resolve) => {
+        resolve(check(node, resolve));
+    });
     const comments = await fetchCommentsList(node);
-    console.log('comments:', comments);
     if (comments) return comments;
 }
 
@@ -430,7 +471,6 @@ export async function fetchCommentsList(node) {
     var unorderedList = node.querySelector('ul:not([class])');
 
     let check_style = true;
-
     if (unorderedList) {
     } else {
         for (const commentDiv of classTable.CommentDiv) {
@@ -440,14 +480,12 @@ export async function fetchCommentsList(node) {
             }
         }
     }
-    console.log('unorderedList:', unorderedList);
-    let oneComments = '';
+    let oneComments = [];
     const res: any[] = [];
     for (const OneCommentDiv of classTable.OneCommentDiv) {
-        oneComments = unorderedList.querySelectorAll('div' + OneCommentDiv);
-        if (oneComments) {
-            break;
-        }
+        Array.from(unorderedList.querySelectorAll('div' + OneCommentDiv)).forEach((item) => {
+            oneComments.push(item);
+        });
     }
 
     if (oneComments) {
@@ -456,61 +494,55 @@ export async function fetchCommentsList(node) {
         oneComments.forEach((item, index) => {
             curCommentsList.push(item);
         });
-        const hasMore = await check(node, null);
 
-        if (hasMore) {
-            return fetchCommentsList(node);
-        } else {
-            let res = [];
-            curCommentsList = curCommentsList.filter((item) => {
-                return (
-                    item.classList.contains('x169t7cy') &&
-                    item.classList.contains('x19f6ikt') &&
-                    item.classList.length === 2
-                );
-            });
+        let res = [];
+        // curCommentsList = curCommentsList.filter((item) => {
+        //     return (
+        //         item.classList.contains('x169t7cy') &&
+        //         item.classList.contains('x19f6ikt') &&
+        //         item.classList.length === 2
+        //     );
+        // });
+        curCommentsList.forEach((item, index) => {
+            // let filteredChildren = [];
+            // for (const FilteredChildren of classTable.FilteredChildren) {
+            //     filteredChildren = item.querySelectorAll('div' + FilteredChildren);
+            //     if (filteredChildren.length > 0) {
+            //         break;
+            //     }
+            // }
+            const itemLink = item.querySelector('a');
+            if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
+                let fbNameUrl = item.querySelector('a').href;
+                const commentUrlAndTime = getCommentUrlFromCommentTimeByCommentNode(item);
+                const comment = {
+                    message: getCommentMessage(1, item),
+                    url: commentUrlAndTime.commentUrl,
+                    id: getCommentId(1, commentUrlAndTime.commentUrl),
+                    time: commentUrlAndTime.commentTime,
+                    author: {
+                        name: getCommenterName(1, item),
+                        id: getCommentInfoObj(1, fbNameUrl).id,
+                        avata: findImageUrl(item),
+                    },
+                };
 
-            curCommentsList.forEach((item, index) => {
-                const filteredChildren = item.querySelectorAll(
-                    '.html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd',
-                );
+                res.push(comment);
+            }
+        });
 
-                for (let i = 0; i < filteredChildren.length; i++) {
-                    const item = filteredChildren[i];
-                    console.log('new item:', item);
-                    const itemLink = item.querySelector('a');
-                    if (itemLink && itemLink.getAttribute('aria-hidden') === 'true') {
-                        let fbNameUrl = item.querySelector('a').href;
-                        const commentUrl = getCommentUrlFromCommentTimeByCommentNode(item);
-                        const comment = {
-                            message: getCommentMessage(1, item),
-                            url: commentUrl,
-                            id: getCommentId(1, commentUrl),
-                            author: {
-                                name: getCommenterName(1, item),
-                                id: getCommentInfoObj(1, fbNameUrl).id,
-                                avata: findImageUrl(item),
-                            },
-                        };
-                        console.log('comment:', comment);
-                        res.push(comment);
-                    }
-                }
-            });
+        const filteredArray = [];
+        const idSet = new Set();
 
-            const filteredArray = [];
-            const idSet = new Set();
+        res.forEach((obj) => {
+            if (!idSet.has(obj.id)) {
+                idSet.add(obj.id);
+                filteredArray.push(obj);
+            }
+        });
+        res = filteredArray;
 
-            res.forEach((obj) => {
-                if (!idSet.has(obj.id)) {
-                    idSet.add(obj.id);
-                    filteredArray.push(obj);
-                }
-            });
-            res = filteredArray;
-
-            return res;
-        }
+        return res;
     }
 }
 
@@ -539,7 +571,10 @@ export async function wait(ms) {
 
 export async function check(node, resolve) {
     await wait(1000);
-
+    const isNotInAllCommit = await checkIsInAllCommit(node);
+    if (isNotInAllCommit) {
+        await wait(1000);
+    }
     // //if (is_load) return;
     // if (len >= STOP_COMMENT_LENGTH) return;
 
@@ -551,18 +586,19 @@ export async function check(node, resolve) {
     //     }
     // }
     await wait(2000);
+    let scrollMoreStatus = scrollToBottomAndCheckMore();
     let checkMoreStatus = clickcheckMore(node);
     let clickMoreStatus = clickMoreCommit(node);
-    console.log('status:', checkMoreStatus, clickMoreStatus);
+
     // if (checkMoreStatus && checkMoreStatus == clickMoreStatus) {
-    if (checkMoreStatus && checkMoreStatus !== clickMoreStatus) {
+    if ((checkMoreStatus && checkMoreStatus !== clickMoreStatus) || scrollMoreStatus) {
         //找留言列表準備抓留言內容
         //if (is_load) return;
         await wait(2000);
-        return true;
+        return check(node, resolve);
         // fetchCommentsList(node);
     }
-    return false;
+    resolve();
 
     // // 留言數量超過STOP_COMMENT_LENGTH 就匯入更新貼文
     // if (len >= STOP_COMMENT_LENGTH) {
@@ -583,6 +619,35 @@ export async function check(node, resolve) {
     //         fetchCommit(resolve);
     //     }
     // }
+}
+
+// 檢查留言列表是否在所有留言
+export async function checkIsInAllCommit(nodes) {
+    let result = false;
+    const selectors = classTable.postCommitModeButton;
+    for (const selector of selectors) {
+        const elements = nodes.querySelectorAll(selector);
+
+        for (const element of elements) {
+            const content = element.textContent;
+            if ((content && content.includes('最相關')) || content.includes('由新到舊')) {
+                // 如果有找到符合的按鈕，則返回false，表示不在所有留言
+                element.click();
+                await wait(100);
+                const menuItemsSelectors = classTable.commitModeMenuItems;
+                menuItemsSelectors.forEach((menuSelector) => {
+                    const menuItems = document.querySelectorAll(menuSelector);
+                    menuItems.forEach((item) => {
+                        if (item.textContent.includes('所有留言')) {
+                            item.click();
+                            result = true;
+                        }
+                    });
+                });
+            }
+        }
+    }
+    return result;
 }
 
 // 檢查是否還有更多留言按鈕。
@@ -679,6 +744,31 @@ export function clickMoreCommit(nodes) {
     return false;
 }
 
+// 捲動至視窗最底下，檢查是否還有更多留言正在載入
+export function scrollToBottomAndCheckMore() {
+    let result = false;
+    const postElementSelectors = classTable.post;
+    for (const selector of postElementSelectors) {
+        const postElements = document.querySelectorAll(selector);
+        if (postElements.length > 0) {
+            const el = postElements[0];
+            const recentHeight = el.scrollHeight;
+            el.scrollTo({ top: recentHeight, behavior: 'instant' });
+            const updatedHeight = el.scrollHeight;
+            wait(1000); // 等待一段時間以確保內容載入
+            if (updatedHeight > recentHeight) {
+                // 有更多內容被載入
+                result = true;
+                return true;
+            } else {
+                // 沒有更多留言
+                return false;
+            }
+        }
+    }
+    return result;
+}
+
 /**
  * - 返回我要點擊排序的btn
  * @param {integer} funcType - 使用方法
@@ -691,7 +781,6 @@ export function getCommitSortListBtn(funcType) {
             selectCommitShowNewBtn = getCommitSwitchBtn(getCommitSortListNode);
             break;
     }
-    console.log('selectCommitShowNewBtn:', selectCommitShowNewBtn);
 
     return selectCommitShowNewBtn;
 }
@@ -724,7 +813,7 @@ export function getCommitSwitchBtn(nodeFetcher) {
     } else {
         switchNewBtn = selectCommitShowTmp[selectCommitShowTmp.length - 1];
     }
-    console.log('switchNewBtn:', switchNewBtn);
+
     return switchNewBtn;
 }
 
@@ -742,7 +831,7 @@ export function getCommitSortListNode() {
             break;
         }
     }
-    console.log('commitSortList:', commitSortList);
+
     return commitSortList;
 }
 
@@ -752,7 +841,6 @@ export function getCommenterIdAndNicknameFromNameUrl(fbNameUrl) {
         id: '',
         nickname: '',
     };
-
     if (fbNameUrl.indexOf('user') != '-1') {
         commenter.id = fbNameUrl.split('user')[1].split('/')[1];
     } else if (fbNameUrl.indexOf('profile.php?') != '-1') {
@@ -760,7 +848,6 @@ export function getCommenterIdAndNicknameFromNameUrl(fbNameUrl) {
     } else {
         commenter.nickname = fbNameUrl.split('?__cft__')[0].replace('https://www.facebook.com', '');
     }
-
     return commenter;
 }
 
@@ -787,14 +874,63 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
         if (tmpPostTime) break;
     }
 
+    let commentTime = 'unknown';
     if (tmpPostTime) {
-        commentUrl =
-            tmpPostTime.href.indexOf('&__cft__') != -1 ? tmpPostTime.href.split('&__cft__')[0] : '';
+        commentUrl = findFirstAnchorTag(tmpPostTime);
+        commentTime = parseTimeInput(tmpPostTime.textContent);
     } else {
         commentUrl = '';
     }
-    console.log('commentUrl:', commentNode, commentUrl);
-    return commentUrl;
+
+    return { commentUrl, commentTime };
+}
+
+function findFirstAnchorTag(element) {
+    // If the element is an 'a' tag, return it
+    if (element.tagName === 'A') {
+        return element.href.indexOf('&__cft__') != -1 ? element.href.split('&__cft__')[0] : '';
+    }
+
+    // Loop through child elements recursively
+    for (let child of element.children) {
+        let found = findFirstAnchorTag(child);
+        if (found) {
+            return found;
+        }
+    }
+
+    // Return null if no anchor tag is found
+    return '';
+}
+
+function parseTimeInput(input) {
+    // Get the number from the input
+    const timeValue = parseInt(input, 10);
+    // Determine the unit and convert accordingly
+    if (input.includes('分鐘') || input.includes('m')) {
+        return formatDate(new Date(Date.now() - timeValue * 60 * 1000)); // minutes
+    } else if (input.includes('小時') || input.includes('h')) {
+        return formatDate(new Date(Date.now() - timeValue * 60 * 60 * 1000)); // hours
+    } else if (input.includes('天') || input.includes('d')) {
+        return formatDate(new Date(Date.now() - timeValue * 24 * 60 * 60 * 1000)); // days
+    } else if (input.includes('週') || input.includes('w')) {
+        return formatDate(new Date(Date.now() - timeValue * 7 * 24 * 60 * 60 * 1000)); // weeks
+    } else if (input.includes('年') || input.includes('y')) {
+        return formatDate(new Date(Date.now() - timeValue * 365 * 24 * 60 * 60 * 1000)); // years
+    } else {
+        return 'unknown';
+    }
+}
+
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
 }
 
 /**
@@ -831,21 +967,20 @@ export function getCommmitCommentNodeByCommentNode(commentNode) {
  * @returns
  */
 export function fetchChildCommentListByCommentNode(commentNode, postDataComments) {
-    console.log('fetchChildCommentListByCommentNode');
     for (let i = 0; i < classTable.oneCommentClass.length; i++) {
         let oneCommentClass = classTable.oneCommentClass[i];
         let oneCommentByCommentNode = commentNode.querySelector(oneCommentClass);
         if (oneCommentByCommentNode) {
             //現在在第一層
-            console.log('invoked1');
+
             fetchUnderOneCommentsListByCommentNode(oneCommentByCommentNode, postDataComments);
         } else if (oneCommentByCommentNode == null) {
             //找不到第一層的node，就去找第二層
-            console.log('invoked2');
+
             fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments);
         }
     }
-    // console.log('invoked3')
+
     return;
 }
 
@@ -891,7 +1026,7 @@ function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments
     let allSecondComment = [];
     let querySelect = '.x169t7cy .x19f6ikt';
     // let querySelect = ".x1n2onr6 .x1xb5h2r"  //他是子層不能同時query喔！會重複抓取
-    console.log('fetchUnderSecondCommentsListByCommentNode');
+
     if (commentNode.querySelectorAll(querySelect)) {
         allSecondComment = commentNode.querySelectorAll(querySelect);
         for (let second_temp = 0; second_temp < allSecondComment.length; second_temp++) {
@@ -903,7 +1038,7 @@ function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments
                     ],
                     postDataComments: postDataComments,
                 };
-                console.log('fetchUnderSecondCommentsListByCommentNode invoked1');
+
                 fetchCommentsList(
                     allSecondComment[second_temp].childNodes[secondCommentChildNodesLength - 1],
                 );
@@ -931,7 +1066,6 @@ export function getCommenterName(funcType, commitCommentNode) {
 
 export function getCommenterNameByMsgClassCommitNode(commitCommentNode) {
     let commenterName = '';
-
     for (let i = 0; i < classTable.pageMsgName.length; i++) {
         let commentNameElement = commitCommentNode.querySelector(
             'span' + classTable.pageMsgName[i],
@@ -1037,7 +1171,6 @@ export function getCommentId(funcType, commentUrl) {
 
 export function getCommentIdByUrlSplitWord(url) {
     let id;
-
     if (url.indexOf('&reply_comment_id=') != -1) {
         id = url.split('&reply_comment_id=')[1].split('&')[0];
     } else if (url.indexOf('?comment_id=') !== -1) {
@@ -1053,9 +1186,7 @@ export function getCommentIdByUrlSplitWord(url) {
  */
 export function fetchByCommentsListNode(fetchData) {
     let commentsListNode = fetchData.childNodes;
-    commentsListNode.forEach((commentNode) => {
-        console.log('commentNode:', commentNode);
-    });
+    commentsListNode.forEach((commentNode) => {});
 }
 
 /**
@@ -1065,9 +1196,19 @@ export function fetchByCommentsListNode(fetchData) {
  */
 export function findImageUrl(node) {
     // Locate the element that contains the image URL using its class or other distinctive attributes
-    const imageElement = node.querySelector(
-        'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xa49m3k.xqeqjp1.x2hbi6w.x13fuv20.xu3j5b3.x1q0q8m5.x26u7qi.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xdl72j9.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1a2a7pz',
-    );
+    const imageElement =
+        node.querySelector(
+            'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.x3ct3a4.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1fmog5m.xu25z0z.x140muxe.xo1y3bh.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz',
+        ) ||
+        node.querySelector(
+            'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xa49m3k.xqeqjp1.x2hbi6w.x13fuv20.xu3j5b3.x1q0q8m5.x26u7qi.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xdl72j9.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1a2a7pz',
+        ) ||
+        node.querySelector(
+            'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1o1ewxj.x3x9cwd.x1e5q0jg.x13rtm0m.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz',
+        ) ||
+        node.querySelector(
+            'a.x1i10hfl.x1qjc9v5.xjbqb8w.xjqpnuy.xc5r6h4.xqeqjp1.x1phubyo.x13fuv20.x18b5jzi.x1q0q8m5.x1t7ytsu.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xdl72j9.x2lah0s.xe8uvvx.xdj266r.x14z9mp.xat24cr.x1lziwak.x2lwn1j.xeuugli.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x1n2onr6.x16tdsg8.x1hl2dhg.xggy1nq.x1ja2u2z.x1t137rt.x1fmog5m.xu25z0z.x140muxe.xo1y3bh.x1q0g3np.x87ps6o.x1lku1pv.x1rg5ohu.x1a2a7pz',
+        );
 
     if (imageElement) {
         // Extract the URL from the 'xlink:href' attribute of the <image> tag inside the <svg>
@@ -1111,7 +1252,8 @@ function getPostUrlFromComment() {
 
 // 取得貼文header
 export function getHeader(i) {
-    const targetElement = getTargetPostClassFromDocumentBody()[0];
+    const targetElement =
+        getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1];
     // let node = document.querySelector('body'); // this.postHeader
     let node = targetElement.parentNode.parentNode; // this.postHeader
     let header = '';
@@ -1122,9 +1264,18 @@ export function getHeader(i) {
     let headerHtml =
         // node.querySelectorAll("div.xu06os2.x1ok221b a.x1i10hfl");
         node.querySelectorAll('div.xu06os2.x1ok221b span.x4k7w5x.x1h91t0o a.x1i10hfl');
+    if (!headerHtml) {
+        headerHtml = node.querySelectorAll(
+            'div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1q0g3np a',
+        );
+    }
 
     for (let i = 0; i < headerHtml.length; i++) {
         if (headerHtml[i].href.search('posts') != -1) {
+            header = headerHtml[i];
+            break;
+        }
+        if (headerHtml[i].href.search('multi_permalinks') != -1) {
             header = headerHtml[i];
             break;
         }
@@ -1153,22 +1304,25 @@ export function getHeader(i) {
             header = node.querySelector(".buofh1pr").querySelectorAll(".qzhwtbm6.knvmm38d")[i].querySelector("a")
           }
     */
+
     return header;
 }
 
-//取得社團名稱div資訊
-export async function getGroupNameClass() {
+//取得社團名稱
+export function getGroupNameClass() {
     let groupName = null;
+    const targetElementLength = getTargetPostClassFromDocumentBody().length;
+    const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
     //取社團名稱(用社團名稱超連結的CSS)
     /*
     /html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div[1]/div[2]/div/div/div/div/div[1]/div/div/div/div[1]/div/div[1]/h1/span/a
     */
     for (let i = 0; i < classTable.group_name.length; i++) {
         const groupNameNode = classTable.group_name[i];
-        groupName = document.querySelector(groupNameNode);
+        groupName = targetElement.querySelector(groupNameNode);
         if (groupName) break;
     }
-    return groupName;
+    return groupName.textContent;
 }
 
 /**
@@ -1183,10 +1337,10 @@ export async function getPostNumInfo(funcType) {
         num: '',
         text: '',
     };
-
     switch (funcType) {
         case 1:
             fbPostInfo = await getPostNumFromUrl(getPostNumFromUrlBySplitWord);
+
             if (fbPostInfo.num == null) {
                 fbPostInfo = await getPostNumFromHeader();
             }
@@ -1195,9 +1349,10 @@ export async function getPostNumInfo(funcType) {
             fbPostInfo = await getPostNumFromUrl(getPostNumFromUrlBySplitWordNoPost);
             break;
     }
-
     fbPostInfo = fixedPostInfo(fbPostInfo);
     fbPostInfo.text = getContentFn().trim();
+    // fbPostInfo.text = '';
+
     return fbPostInfo;
 }
 
@@ -1270,6 +1425,20 @@ async function getPostNumFromHeader() {
         num: '',
     };
     await getHeader(1).focus();
+    if (getHeader(1).href.indexOf('multi_permalinks') != -1) {
+        const url = getHeader(1).href;
+        const regex = /groups\/(\d+).*multi_permalinks=(\d+)/;
+        const matches = url.match(regex);
+        if (matches) {
+            const groupId = matches[1]; // groups 后面的 ID
+            const permalinkId = matches[2]; // multi_permalinks 中的 ID
+            fbPostInfo.url = `https://www.facebook.com/groups/${groupId}/permalink/${permalinkId}`;
+            fbPostInfo.num = permalinkId;
+        } else {
+            console.log('No matches found.');
+        }
+        return fbPostInfo;
+    }
     if (getHeader(1).href.indexOf('?__cft__[0]=') != -1) {
         fbPostInfo.url = getHeader(1).href.split('?__cft__[0]=')[0];
         fbPostInfo.num = fbPostInfo.url.split('/').filter((el) => el != '')[5];
@@ -1278,13 +1447,16 @@ async function getPostNumFromHeader() {
 }
 
 export const content = (selector) => {
-    // let contentNodes = postContentNode.querySelector(selector);
-    const targetNode = getTargetPostClassFromDocumentBody()[0].parentNode.parentNode;
+    
+    const targetNode =
+    getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1]
+    .parentNode.parentNode;
+
     if (targetNode) {
-        let contentNodes = targetNode.childNodes[2].querySelector(selector);
+        const targetNodeChildNode = targetNode.childNodes[0];
+        let contentNodes = targetNodeChildNode.nodeType === Node.COMMENT_NODE ?  targetNode.querySelector(selector) : targetNode.childNodes[0].querySelector(selector);
     }
-    return getContentText(targetNode.childNodes[2]);
-    //  return getContentText(contentNodes);
+    return getContentText(targetNode);
 };
 
 export const getContentFn = () => {
@@ -1299,11 +1471,43 @@ export const getContentFn = () => {
     return '';
 };
 
-const getContentText = (contentNode) => {
-    if (contentNode !== null) {
+const getContentText = (contentNode) => {    
+    if (contentNode !== null && contentNode.className !== 'xd665xh x10l6tqk x1dquyif') {
         if (contentNode.hasChildNodes()) {
             let text = '';
             contentNode.childNodes.forEach((element) => {
+                // refactor with find array
+                const ignoreClasses = [
+                    'x1lliihq xjkvuk6 x1iorvi4',
+                    'xdj266r x14z9mp xat24cr x1lziwak x1vvkbs',
+                    'x193iq5w xeuugli x13faqbe x1vvkbs xlh3980 xvmahel x1n0sxbx x6prxxf xvq8zen xo1l8bm xi81zsa',
+                    'x6zurak x18bv5gf x193iq5w xeuugli x13faqbe x1vvkbs xt0psk2 xi81zsa xlh3980 xvmahel x1x9mg3 xo1l8bm',
+                    'x1i10hfl xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x14z9mp xat24cr x1lziwak xexx8yu xyri2b x18d9i69 x1c1uobl x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1heor9g xkrqix3 x1sur9pj x1s688f',
+                    'x1rg5ohu x1n2onr6 xs7f9wi',
+                    'x9f619 x1n2onr6 x1ja2u2z x78zum5 xdt5ytf x2lah0s x193iq5w',
+                    'html-div xdj266r x14z9mp xat24cr x1lziwak xexx8yu xyri2b x18d9i69 x1c1uobl xh8yej3',
+                    'html-div xdj266r x14z9mp x1lziwak x18d9i69 x1cy8zhl x78zum5 x1q0g3np xod5an3 xz9dl7a x1g0dm76 xpdmqnj',
+                    'html-div xdj266r x11i5rnm x1mh8g0r x18d9i69 x1cy8zhl x78zum5 x1q0g3np xod5an3 xz9dl7a x1ye3gou xn6708d',
+                    'xabvvm4 xeyy32k x1ia1hqs x1a2w583 x6ikm8r x10wlt62',
+                    'html-div xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6',
+                ];
+                const isCommentNode = element.nodeType === 8;
+                if (isCommentNode) {
+                    return;
+                }
+                const isAorSVG = element.tagName === 'A' || element.tagName === 'SVG';
+                const isAriaHiddenSpan =
+                    element.tagName === 'SPAN' && element.getAttribute('aria-hidden') === 'true';
+                const isButton =
+                    (element.tagName === 'SPAN' || element.tagName === 'DIV') &&
+                    element.getAttribute('role') === 'button';
+                if (isAorSVG || isAriaHiddenSpan || isButton) {
+                    return;
+                }
+                // Check if the element's className matches any of the ignore classes
+                if (ignoreClasses.includes(element.className)) {
+                    return;
+                }
                 text += getContentText(element);
             });
 
@@ -1324,6 +1528,8 @@ const getContentText = (contentNode) => {
 //處理dom行為的function
 export function getTargetPostClassFromDocumentBody() {
     const _this = this;
+    console.log(document.querySelector('body'));
+
     let postClass = getTargetFromClassTablePost(document.querySelector('body'));
     return postClass;
 }
@@ -1354,7 +1560,7 @@ export function getFbGroupId(funcType) {
         default:
             break;
     }
-    console.log('getFbGroupId:', groupId);
+
     return groupId;
 }
 
