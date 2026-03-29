@@ -130,7 +130,7 @@
         "webext-bridge": "5.0.5",
         "webpack": "5.75.0",
         "webpack-bundle-analyzer": "4.7.0",
-        "webpack-dev-middleware": "6.0.0",
+        "webpack-dev-middleware": "6.1.2",
         "webpack-hot-middleware": "2.25.3",
         "webpack-merge": "5.8.0",
         "webpackbar": "5.0.2",
