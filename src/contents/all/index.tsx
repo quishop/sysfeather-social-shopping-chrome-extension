@@ -444,12 +444,12 @@ export function extractUserStringByBottomUser(scriptString) {
 export async function fetchComments() {
     const targetElementLength = getTargetPostClassFromDocumentBody().length;
     const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
-
+    
     let node;
     if (targetElement)
         for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
             const pagePostCommitDiv = targetElement.querySelector(pagePostCommitClass);
-
+            
             if (pagePostCommitDiv) {
                 node = pagePostCommitDiv;
                 break;
@@ -469,7 +469,7 @@ export async function fetchCommentsList(node) {
     }
 
     var unorderedList = node.querySelector('ul:not([class])');
-
+    
     let check_style = true;
     if (unorderedList) {
     } else {
@@ -479,7 +479,7 @@ export async function fetchCommentsList(node) {
                 break;
             }
         }
-    }
+    }    
     let oneComments = [];
     const res: any[] = [];
     for (const OneCommentDiv of classTable.OneCommentDiv) {
@@ -495,7 +495,7 @@ export async function fetchCommentsList(node) {
             curCommentsList.push(item);
         });
 
-        let res = [];
+        let res = [];    
         // curCommentsList = curCommentsList.filter((item) => {
         //     return (
         //         item.classList.contains('x169t7cy') &&
