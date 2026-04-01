@@ -246,6 +246,7 @@ const classTable: any = {
     // CommentDiv 是整篇留言最外層的DIV
     CommentDiv: [
         // 原結構：div > div
+        'x14z9mp xat24cr x1lziwak xexx8yu xyri2b x18d9i69 x1c1uobl x1gslohp',
         'x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1gslohp',
         'x1gslohp',
         'x18xomjl xbcz3fp',
