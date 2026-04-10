@@ -870,7 +870,13 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
     let tmpPostTime = null;
     for (let i = 0; i < classTable.postTimeID.length; i++) {
         const element = classTable.postTimeID[i];
-        tmpPostTime = commentNode.querySelector(element);
+        const isUserLink = commentNode.querySelector(element)?.getAttribute('href') && commentNode.querySelector(element).getAttribute('href').includes('user')
+        if (isUserLink) {
+            tmpPostTime = commentNode.querySelectorAll(element)[1]
+        }
+        if (!isUserLink) {
+            tmpPostTime = isUserLink ? commentNode.querySelectorAll(element)[1] : commentNode.querySelector(element);
+        }
         if (tmpPostTime) break;
     }
 
@@ -881,7 +887,6 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
     } else {
         commentUrl = '';
     }
-
     return { commentUrl, commentTime };
 }
 
