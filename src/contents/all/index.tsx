@@ -591,7 +591,7 @@ export async function check(node, resolve) {
     let clickMoreStatus = clickMoreCommit(node);
 
     // if (checkMoreStatus && checkMoreStatus == clickMoreStatus) {
-    if ((checkMoreStatus && checkMoreStatus !== clickMoreStatus) || scrollMoreStatus) {
+    if (clickMoreStatus || scrollMoreStatus) {
         //找留言列表準備抓留言內容
         //if (is_load) return;
         await wait(2000);
@@ -732,7 +732,7 @@ export function clickMoreCommit(nodes) {
         if (moreCommitArr.length > 0) break;
     }
     for (let i = 0; i < moreCommitArr.length; i++) {
-        const element = moreCommitArr[i];
+        const element = moreCommitArr[i];        
         if (element.hasChildNodes() && element.textContent.indexOf('隱藏') == -1) {
             count++;
             element.click();
