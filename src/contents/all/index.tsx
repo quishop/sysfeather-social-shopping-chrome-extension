@@ -591,10 +591,10 @@ export async function check(node, resolve) {
     let clickMoreStatus = clickMoreCommit(node);
 
     // if (checkMoreStatus && checkMoreStatus == clickMoreStatus) {
-    if (clickMoreStatus || scrollMoreStatus) {
+    if (clickMoreStatus || scrollMoreStatus || checkMoreStatus) {
         //找留言列表準備抓留言內容
         //if (is_load) return;
-        await wait(2000);
+        await wait(3000);
         return check(node, resolve);
         // fetchCommentsList(node);
     }
