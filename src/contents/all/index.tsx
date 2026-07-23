@@ -591,7 +591,7 @@ export async function check(node, resolve) {
     let clickMoreStatus = clickMoreCommit(node);
 
     // if (checkMoreStatus && checkMoreStatus == clickMoreStatus) {
-    if (clickMoreStatus || scrollMoreStatus || checkMoreStatus) {
+    if (clickMoreStatus || scrollMoreStatus) {
         //找留言列表準備抓留言內容
         //if (is_load) return;
         await wait(3000);
