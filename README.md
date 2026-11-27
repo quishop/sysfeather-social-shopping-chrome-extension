@@ -162,6 +162,25 @@ const proxyTable: ProxyTable = {
 pnpm build
 ```
 
+### 發佈流程
+
+發佈一律用正式版打包，**不要用 `pnpm start`（開發版）產生的 `extension/` 發佈**：開發版含熱更新檔、source map，而且會連 `127.0.0.1:3600` 自動重載。
+
+1. 開發分支從 `master` 拉出，完成後開 PR 併回 `master`。
+2. 在 `master` 更新 `package.json` 的版號，合併後打 tag（例如 `v1.0.32`）。
+3. 切到該 tag，安裝依賴後打包並壓成 zip：
+
+    ```bash
+    git checkout v1.0.32
+    pnpm install --frozen-lockfile
+    pnpm build
+    cd extension && zip -r ../sysfeather-social-shopping-v1.0.32.zip . && cd ..
+    ```
+
+4. 檢查 zip：沒有 `hot/`、`*.map`，`manifest.json` 的 `permissions` 只有 `storage`。
+
+> 目前既有的 TypeScript 型別錯誤在正式版打包時只會顯示為警告，不會中斷打包（另開票修正）。
+
 如果你想分析打包情況：
 
 ```bash

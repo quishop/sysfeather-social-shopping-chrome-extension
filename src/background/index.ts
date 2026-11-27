@@ -20,6 +20,10 @@ console.log('This is background page!');
 // );
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    // SL-1487：只處理本插件自己送來的訊息
+    if (sender.id !== chrome.runtime.id) {
+        return;
+    }
     if (request.action === 'sendData') {
         // Store data in local storage
         console.log('received data:', request.data);
