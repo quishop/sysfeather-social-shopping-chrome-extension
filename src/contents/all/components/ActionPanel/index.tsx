@@ -71,42 +71,7 @@ const ActionPanel = () => {
                 // sendMessage('hello-from-content-script', JSON.stringify(data), 'background');
             })
             .catch((e) => {
-                const groupID = getGroupID();
-                const groupName = getGroupNameClass();
-                new Promise(() => {
-                    return fetch(
-                        'https://live-shopping.sfec-ipo.com/api/error-logs',
-                        {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                type: "FRONTEND_ERROR",
-                                errorCode: e instanceof Error ? e.name : 'UnknownError',
-                                message: e instanceof Error ? e.message : 'Unknown error',
-                                severity: 'HIGH',
-                                // SL-1487：stack trace 只留前 5 行、最多 1000 字
-                                stackTrace:
-                                    e instanceof Error && e.stack
-                                        ? e.stack.split('\n').slice(0, 5).join('\n').slice(0, 1000)
-                                        : 'No stack trace',
-                                serviceCode: 'group_plus',
-                                context: {
-                                    groupId: groupID,
-                                    groupName,
-                                },
-                                // SL-1487：網址不帶 query 與 hash
-                                url: `${window.location.origin}${window.location.pathname}`,
-                                env: 'prod',
-                                featureCode: 'fetch_comments',
-                                action: 'fetch_comments',
-                            }),
-                        },
-                    );
-                }).then((res) => {
-                    console.log('log response:', res);
-                });
+                // SL-1483：不再呼叫 /api/error-logs（已被 WAF 全擋，路由將由 SL-1328 移除）
                 console.log('error:', e);
             })
             .finally(() => {
