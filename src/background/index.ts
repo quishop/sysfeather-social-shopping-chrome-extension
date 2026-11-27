@@ -4,6 +4,9 @@
 //     console.log('onMessage:', msg);
 // });
 
+// SL-1492：讓此檔成為 module（isolatedModules 不接受全域 script）
+export {};
+
 console.log('This is background page!');
 
 // chrome.webRequest.onBeforeRequest.addListener(
@@ -42,7 +45,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         //     });
         // });
         // Create a new tab with the desired URL
-        chrome.tabs.create({ url: chrome.runtime.getURL('options.html') }, (tab) => {
+        chrome.tabs.create({ url: chrome.runtime.getURL('options.html') }, (_tab) => {
             sendResponse({ status: 'Tab opened' });
         });
         sendResponse({ status: 'Data received and tab opened' });

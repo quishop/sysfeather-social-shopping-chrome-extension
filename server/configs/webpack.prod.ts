@@ -27,15 +27,6 @@ const prodConfig = merge(commonConfig, {
                 profile: ENABLE_ANALYZE,
             },
         }),
-        // SL-1486：既有的型別錯誤先降為警告，不擋正式版打包（型別錯誤另開票修正）
-        {
-            apply(compiler: webpack.Compiler) {
-                ForkTsCheckerWebpackPlugin.getCompilerHooks(compiler).issues.tap(
-                    'TypeErrorsAsWarnings',
-                    (issues) => issues.map((issue) => ({ ...issue, severity: 'warning' as const })),
-                );
-            },
-        },
         new webpack.ids.HashedModuleIdsPlugin({
             hashFunction: 'sha256',
             hashDigest: 'hex',

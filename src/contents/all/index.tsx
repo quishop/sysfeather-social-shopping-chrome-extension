@@ -1,7 +1,5 @@
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import ActionPanel from './components/ActionPanel';
-import { sendMessage } from 'webext-bridge';
 import './style.scss';
 import { classTable } from './ClassTable';
 import { htmlTable } from './HtmlTable';
@@ -25,7 +23,7 @@ try {
     }
 
     as.forEach((item) => {
-        item.addEventListener('click', (e) => {
+        item.addEventListener('click', (_e) => {
             const link = item.getAttribute('href');
             if (isFacebookPostUrl(link)) {
                 console.log('Facebook post URL detected:', link);
@@ -235,7 +233,7 @@ export function getUserID() {
     return userId;
 }
 
-function getGroupIDFromMeta(str) {
+function getGroupIDFromMeta(_str) {
     let groupId = '';
     const documentScripts = document.getElementsByTagName('meta');
     for (let i = 0; i < documentScripts.length; i++) {
@@ -460,17 +458,19 @@ export async function fetchComments() {
     });
     const comments = await fetchCommentsList(node);
     if (comments) return comments;
+    // eslint-disable-next-line unicorn/no-useless-undefined -- SL-1492：noImplicitReturns 需要明確回傳值，維持原本回傳 undefined 的行為
+    return undefined;
 }
 
-export async function fetchCommentsList(node) {
+export async function fetchCommentsList(node, _unused?: unknown) {
     // var unorderedList = nodes.querySelector('ul:not([class])');
     if (!node) {
-        return;
+        // eslint-disable-next-line unicorn/no-useless-undefined -- SL-1492：noImplicitReturns 需要明確回傳值，維持原本回傳 undefined 的行為
+        return undefined;
     }
 
     var unorderedList = node.querySelector('ul:not([class])');
     
-    let check_style = true;
     if (unorderedList) {
     } else {
         for (const commentDiv of classTable.CommentDiv) {
@@ -481,7 +481,6 @@ export async function fetchCommentsList(node) {
         }
     }    
     let oneComments = [];
-    const res: any[] = [];
     for (const OneCommentDiv of classTable.OneCommentDiv) {
         Array.from(unorderedList.querySelectorAll('div' + OneCommentDiv)).forEach((item) => {
             oneComments.push(item);
@@ -491,7 +490,7 @@ export async function fetchCommentsList(node) {
     if (oneComments) {
         let curCommentsList = [];
 
-        oneComments.forEach((item, index) => {
+        oneComments.forEach((item) => {
             curCommentsList.push(item);
         });
 
@@ -503,7 +502,7 @@ export async function fetchCommentsList(node) {
         //         item.classList.length === 2
         //     );
         // });
-        curCommentsList.forEach((item, index) => {
+        curCommentsList.forEach((item) => {
             // let filteredChildren = [];
             // for (const FilteredChildren of classTable.FilteredChildren) {
             //     filteredChildren = item.querySelectorAll('div' + FilteredChildren);
@@ -544,25 +543,10 @@ export async function fetchCommentsList(node) {
 
         return res;
     }
+    // eslint-disable-next-line unicorn/no-useless-undefined -- SL-1492：noImplicitReturns 需要明確回傳值，維持原本回傳 undefined 的行為
+    return undefined;
 }
 
-function findAllNodesByClass(node, className, results = []) {
-    // Check if the current node is a 'div' with the desired class name
-    if (
-        node.nodeType === Node.ELEMENT_NODE &&
-        node.tagName === 'DIV' &&
-        node.classList.contains(className)
-    ) {
-        results.push(node);
-    }
-
-    // Recursively search in each child node
-    for (let child of node.children) {
-        findAllNodesByClass(child, className, results);
-    }
-
-    return results;
-}
 export async function wait(ms) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
@@ -587,7 +571,7 @@ export async function check(node, resolve) {
     // }
     await wait(2000);
     let scrollMoreStatus = scrollToBottomAndCheckMore();
-    let checkMoreStatus = clickcheckMore(node);
+    clickcheckMore(node);
     let clickMoreStatus = clickMoreCommit(node);
 
     // if (checkMoreStatus && checkMoreStatus == clickMoreStatus) {
@@ -1027,7 +1011,7 @@ export function fetchUnderOneCommentsListByCommentNode(commentNode, postDataComm
 // }
 
 //處理第二層下的所有回覆
-function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments) {
+function fetchUnderSecondCommentsListByCommentNode(commentNode, _postDataComments) {
     let allSecondComment = [];
     let querySelect = '.x169t7cy .x19f6ikt';
     // let querySelect = ".x1n2onr6 .x1xb5h2r"  //他是子層不能同時query喔！會重複抓取
@@ -1037,12 +1021,6 @@ function fetchUnderSecondCommentsListByCommentNode(commentNode, postDataComments
         for (let second_temp = 0; second_temp < allSecondComment.length; second_temp++) {
             if (allSecondComment[second_temp].childNodes.length > 0) {
                 let secondCommentChildNodesLength = allSecondComment[second_temp].childNodes.length;
-                let fetchData = {
-                    node: allSecondComment[second_temp].childNodes[
-                        secondCommentChildNodesLength - 1
-                    ],
-                    postDataComments: postDataComments,
-                };
 
                 fetchCommentsList(
                     allSecondComment[second_temp].childNodes[secondCommentChildNodesLength - 1],
@@ -1149,7 +1127,7 @@ export function getCommentInfoObj(funcType, fbNameUrl) {
  * @returns {string} - 留言的a_link
  */
 export function getCommentUrl(funcType, commentNode) {
-    let commentUrl = '';
+    let commentUrl: any = '';
     switch (funcType) {
         case 1:
             commentUrl = getCommentUrlFromCommentTimeByCommentNode(commentNode);
@@ -1191,7 +1169,7 @@ export function getCommentIdByUrlSplitWord(url) {
  */
 export function fetchByCommentsListNode(fetchData) {
     let commentsListNode = fetchData.childNodes;
-    commentsListNode.forEach((commentNode) => {});
+    commentsListNode.forEach((_commentNode) => {});
 }
 
 /**
@@ -1225,38 +1203,9 @@ export function findImageUrl(node) {
     return '';
 }
 
-// 取得貼文url
-function getPostUrl() {
-    const url = getPostUrlFromComment();
-    if (url) return url;
-
-    const header = getHeader();
-    if (header && header.href) {
-        const urlFromHeader = header.href.match('.*/posts/[0-9]+');
-        if (urlFromHeader && urlFromHeader[0]) {
-            return urlFromHeader[0];
-        }
-    }
-
-    return null;
-}
-
-// 從留言時間取得貼文url
-function getPostUrlFromComment() {
-    for (const commentTimeNode of classTable.commentTime) {
-        const commentTimeClass = postCommit.querySelector(commentTimeNode);
-        if (commentTimeClass && commentTimeClass.href) {
-            const commentTimeUrl = commentTimeClass.href.match('.*/posts/[0-9]+');
-            if (commentTimeUrl && commentTimeUrl[0]) {
-                return commentTimeUrl[0];
-            }
-        }
-    }
-    return null;
-}
 
 // 取得貼文header
-export function getHeader(i) {
+export function getHeader(_i?: number): any {
     const targetElement =
         getTargetPostClassFromDocumentBody()[getTargetPostClassFromDocumentBody().length - 1];
     // let node = document.querySelector('body'); // this.postHeader
@@ -1337,7 +1286,7 @@ export function getGroupNameClass() {
  * @returns {object} - 返回貼文url object
  */
 export async function getPostNumInfo(funcType) {
-    let fbPostInfo = {
+    let fbPostInfo: { url: string; num: string; text?: string } = {
         url: '',
         num: '',
         text: '',
@@ -1425,7 +1374,7 @@ function fixedPostInfo(fbPostInfo) {
 }
 
 async function getPostNumFromHeader() {
-    let fbPostInfo = {
+    let fbPostInfo: { url: string; num: string; text?: string } = {
         url: '',
         num: '',
     };
@@ -1459,7 +1408,8 @@ export const content = (selector) => {
 
     if (targetNode) {
         const targetNodeChildNode = targetNode.childNodes[0];
-        let contentNodes = targetNodeChildNode.nodeType === Node.COMMENT_NODE ?  targetNode.querySelector(selector) : targetNode.childNodes[0].querySelector(selector);
+        // eslint-disable-next-line no-void -- SL-1492：保留原本的查詢呼叫，只是不再存到沒用到的變數
+        void (targetNodeChildNode.nodeType === Node.COMMENT_NODE ?  targetNode.querySelector(selector) : targetNode.childNodes[0].querySelector(selector));
     }
     return getContentText(targetNode);
 };
@@ -1532,7 +1482,6 @@ const getContentText = (contentNode) => {
 
 //處理dom行為的function
 export function getTargetPostClassFromDocumentBody() {
-    const _this = this;
     console.log(document.querySelector('body'));
 
     let postClass = getTargetFromClassTablePost(document.querySelector('body'));
@@ -1562,6 +1511,7 @@ export function getFbGroupId(funcType) {
     switch (funcType) {
         case 1:
             groupId = getGroupIDByStrReplace();
+            break;
         default:
             break;
     }
@@ -1596,6 +1546,7 @@ export function getfbPostNum(funcType) {
     switch (funcType) {
         case 1:
             fbPostNum = getfbPostNumFromPostUrl();
+            break;
         default:
             break;
     }
@@ -1619,28 +1570,6 @@ function getfbPostNumFromPostUrl() {
     return fbPostNum;
 }
 
-//檢查留言列表dom節點是否為空若為空就終止
-function checkCommentsNodeHasChild(node) {
-    let check = true;
-
-    if (!node || !node.hasChildNodes()) {
-        check = false;
-    }
-
-    if (check) {
-        let commentChildNode = node.childNodes;
-        if (
-            commentChildNode.length == 0 ||
-            !commentChildNode ||
-            !commentChildNode[0].querySelector('div')
-            //li[0].querySelector("div").getAttribute("aria-label")
-        ) {
-            check = false;
-        }
-    }
-
-    return check;
-}
 
 //  /**
 //    * - 遞迴留言列表的每個留言節點(含有頭像的)

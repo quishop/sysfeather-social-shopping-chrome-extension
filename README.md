@@ -179,8 +179,6 @@ pnpm build
 
 4. 檢查 zip：沒有 `hot/`、`*.map`，`manifest.json` 的 `permissions` 只有 `storage`。
 
-> 目前既有的 TypeScript 型別錯誤在正式版打包時只會顯示為警告，不會中斷打包（另開票修正）。
-
 如果你想分析打包情況：
 
 ```bash

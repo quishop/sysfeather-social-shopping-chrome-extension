@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Typography, Button } from 'antd';
-import { sendMessage } from 'webext-bridge';
 import {
     getPostOwner,
     getCreationTime,
-    getFBCommitLength,
     getPostNumInfo,
     getGroupID,
     getGroupNameClass,
@@ -33,7 +31,7 @@ const ActionPanel = () => {
                         name: groupName,
                     },
                     author: postOwner,
-                    createTime: new Date((creationTime as number) * 1000),
+                    createTime: new Date((creationTime as unknown as number) * 1000),
 
                     commentsLength: commentList?.length || 0,
                     post: postNumInfo,
