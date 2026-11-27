@@ -569,7 +569,7 @@ function countCommentNodes(node) {
 /**
  * - 展開並載入所有留言，載入完畢後才 resolve
  * - 每輪：等 1 秒切到「所有留言」→ 等 2 秒 → 捲到底、點「查看更多留言／回覆」
- * - 這一輪有動靜（點到按鈕、有載入圖示、捲動後高度變高、留言數增加）就等 3 秒再下一輪
+ * - 這一輪有動靜（點到「查看更多留言／回覆」、有載入圖示、捲動後高度變高、留言數增加）就等 3 秒再下一輪
  * - 連續 IDLE_ROUNDS_TO_FINISH 輪沒有動靜才結束；超過 CHECK_MAX_DURATION_MS 也結束
  */
 export async function check(node) {
@@ -590,14 +590,16 @@ export async function check(node) {
         }
         await wait(2000);
         const scrollMoreStatus = await scrollToBottomAndCheckMore();
-        const checkMoreStatus = clickcheckMore(node);
+        // clickcheckMore 展開的是留言內文的「查看更多」，不代表還有留言要載入；
+        // 原本就不列入判斷，維持不列入，避免同一個按鈕每輪都被點到而一直跑到時間上限
+        clickcheckMore(node);
         const clickMoreStatus = clickMoreCommit(node);
 
         const commentCount = countCommentNodes(node);
         const commentCountIncreased = commentCount > lastCommentCount;
         lastCommentCount = commentCount;
 
-        if (clickMoreStatus || scrollMoreStatus || checkMoreStatus || commentCountIncreased) {
+        if (clickMoreStatus || scrollMoreStatus || commentCountIncreased) {
             idleRounds = 0;
             await wait(3000);
         } else {
