@@ -453,9 +453,7 @@ export async function fetchComments() {
                 break;
             }
         }
-    await new Promise((resolve) => {
-        resolve(check(node, resolve));
-    });
+    await check(node);
     const comments = await fetchCommentsList(node);
     if (comments) return comments;
     // eslint-disable-next-line unicorn/no-useless-undefined -- SL-1492：noImplicitReturns 需要明確回傳值，維持原本回傳 undefined 的行為
@@ -553,56 +551,59 @@ export async function wait(ms) {
     });
 }
 
-export async function check(node, resolve) {
-    await wait(1000);
-    const isNotInAllCommit = await checkIsInAllCommit(node);
-    if (isNotInAllCommit) {
+// SL-1493：連續幾輪都沒有動靜才當成留言載入完畢
+const IDLE_ROUNDS_TO_FINISH = 2;
+// SL-1493：抓留言的總時間上限，避免 FB 改版後判斷失靈而無限循環
+const CHECK_MAX_DURATION_MS = 3 * 60 * 1000;
+
+// 計算目前已載入的留言節點數（用第一個找得到節點的 selector）
+function countCommentNodes(node) {
+    if (!node) return 0;
+    for (const selector of classTable.postCommitNode) {
+        const count = node.querySelectorAll(selector).length;
+        if (count > 0) return count;
+    }
+    return 0;
+}
+
+/**
+ * - 展開並載入所有留言，載入完畢後才 resolve
+ * - 每輪：等 1 秒切到「所有留言」→ 等 2 秒 → 捲到底、點「查看更多留言／回覆」
+ * - 這一輪有動靜（點到按鈕、有載入圖示、捲動後高度變高、留言數增加）就等 3 秒再下一輪
+ * - 連續 IDLE_ROUNDS_TO_FINISH 輪沒有動靜才結束；超過 CHECK_MAX_DURATION_MS 也結束
+ */
+export async function check(node) {
+    const startTime = Date.now();
+    let idleRounds = 0;
+    let lastCommentCount = countCommentNodes(node);
+
+    while (idleRounds < IDLE_ROUNDS_TO_FINISH) {
+        if (Date.now() - startTime > CHECK_MAX_DURATION_MS) {
+            console.warn('[check] 超過抓留言時間上限，以目前已載入的留言繼續');
+            return;
+        }
+
         await wait(1000);
+        const isNotInAllCommit = await checkIsInAllCommit(node);
+        if (isNotInAllCommit) {
+            await wait(1000);
+        }
+        await wait(2000);
+        const scrollMoreStatus = await scrollToBottomAndCheckMore();
+        const checkMoreStatus = clickcheckMore(node);
+        const clickMoreStatus = clickMoreCommit(node);
+
+        const commentCount = countCommentNodes(node);
+        const commentCountIncreased = commentCount > lastCommentCount;
+        lastCommentCount = commentCount;
+
+        if (clickMoreStatus || scrollMoreStatus || checkMoreStatus || commentCountIncreased) {
+            idleRounds = 0;
+            await wait(3000);
+        } else {
+            idleRounds++;
+        }
     }
-    // //if (is_load) return;
-    // if (len >= STOP_COMMENT_LENGTH) return;
-
-    // for (const postCommitNode of classTable.postCommitNode) {
-    //     const postCommentListNode = node.querySelectorAll(postCommitNode);
-    //     if (postCommentListNode.length > 0) {
-    //         len = postCommentListNode.length;
-    //         break;
-    //     }
-    // }
-    await wait(2000);
-    let scrollMoreStatus = scrollToBottomAndCheckMore();
-    clickcheckMore(node);
-    let clickMoreStatus = clickMoreCommit(node);
-
-    // if (checkMoreStatus && checkMoreStatus == clickMoreStatus) {
-    if (clickMoreStatus || scrollMoreStatus) {
-        //找留言列表準備抓留言內容
-        //if (is_load) return;
-        await wait(3000);
-        return check(node, resolve);
-        // fetchCommentsList(node);
-    }
-    resolve();
-
-    // // 留言數量超過STOP_COMMENT_LENGTH 就匯入更新貼文
-    // if (len >= STOP_COMMENT_LENGTH) {
-    //     //if (is_load) return;
-    //     is_load = true;
-    //     fetchCommit(resolve);
-    // } else {
-    //     await wait(2000);
-    //     let checkMoreStatus = clickcheckMore(nodes);
-    //     let clickMoreStatus = clickMoreCommit(nodes);
-
-    //     // 如果沒有可以展開的按鈕就匯入更新貼文
-    //     if (!checkMoreStatus && checkMoreStatus == clickMoreStatus) {
-    //         //找留言列表準備抓留言內容
-    //         //if (is_load) return;
-    //         is_load = true;
-    //         await wait(2000);
-    //         fetchCommit(resolve);
-    //     }
-    // }
 }
 
 // 檢查留言列表是否在所有留言
@@ -729,7 +730,7 @@ export function clickMoreCommit(nodes) {
 }
 
 // 捲動至視窗最底下，檢查是否還有更多留言正在載入
-export function scrollToBottomAndCheckMore() {
+export async function scrollToBottomAndCheckMore() {
     let result = false;
     const postElementSelectors = classTable.post;
     for (const selector of postElementSelectors) {
@@ -738,8 +739,9 @@ export function scrollToBottomAndCheckMore() {
             const el = postElements[0];
             const recentHeight = el.scrollHeight;
             el.scrollTo({ top: recentHeight, behavior: 'instant' });
+            // SL-1493：原本的 wait 沒有 await，量到的高度永遠和捲動前一樣
+            await wait(1500); // 等待一段時間以確保內容載入
             const updatedHeight = el.scrollHeight;
-            wait(1000); // 等待一段時間以確保內容載入
             if (updatedHeight > recentHeight) {
                 // 有更多內容被載入
                 result = true;
