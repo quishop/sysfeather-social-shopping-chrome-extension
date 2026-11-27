@@ -513,7 +513,7 @@ const classTable: any = {
 initial();
 function initial() {
     for (const key in classTable) {
-        classTable[key].forEach((el: any, index: any) => {
+        classTable[key].forEach((_el: any, index: any) => {
             classTable[key][index] = '.' + classTable[key][index].replaceAll(' ', '.');
         });
     }

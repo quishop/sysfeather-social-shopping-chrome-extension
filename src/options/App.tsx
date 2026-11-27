@@ -94,7 +94,7 @@ const App = () => {
                     <List
                         itemLayout="horizontal"
                         dataSource={data.comments}
-                        renderItem={(item) => (
+                        renderItem={(item: any) => (
                             <List.Item
                                 className="clickable-list-item"
                                 onClick={(e) => {

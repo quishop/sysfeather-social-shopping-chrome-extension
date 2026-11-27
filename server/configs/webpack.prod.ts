@@ -35,15 +35,7 @@ const prodConfig = merge(commonConfig, {
         new AntdDayjsWebpackPlugin(),
     ],
     optimization: {
-        splitChunks: {
-            cacheGroups: {
-                vendor: {
-                    test: /[/\\]node_modules[/\\](react|react-dom)[/\\]/,
-                    name: 'vendor',
-                    chunks: 'all',
-                },
-            },
-        },
+        // SL-1486：不拆 vendor.js。content script 只能載入 manifest 列出的檔案，拆出去就得把 vendor.js 注入所有網站
         minimize: true,
         minimizer: [
             new TerserPlugin({
