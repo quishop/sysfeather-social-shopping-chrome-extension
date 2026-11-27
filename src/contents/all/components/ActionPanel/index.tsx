@@ -60,7 +60,10 @@ const ActionPanel = () => {
                                 serviceCode: 'group_plus',
                                 featureCode: 'fetch_comments',
                                 action: 'fetch_comments',
-                                metaData: data,
+                                // SL-1485：只記錄用量，不上傳留言者的 FB ID、姓名、頭像與留言內容
+                                metadata: {
+                                    commentsLength: data.commentsLength,
+                                },
                             }),
                         },
                     );
