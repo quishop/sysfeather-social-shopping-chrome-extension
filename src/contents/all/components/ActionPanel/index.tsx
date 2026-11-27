@@ -86,13 +86,18 @@ const ActionPanel = () => {
                                 errorCode: e instanceof Error ? e.name : 'UnknownError',
                                 message: e instanceof Error ? e.message : 'Unknown error',
                                 severity: 'HIGH',
-                                stackTrace: e instanceof Error ? e.stack : 'No stack trace',
+                                // SL-1487：stack trace 只留前 5 行、最多 1000 字
+                                stackTrace:
+                                    e instanceof Error && e.stack
+                                        ? e.stack.split('\n').slice(0, 5).join('\n').slice(0, 1000)
+                                        : 'No stack trace',
                                 serviceCode: 'group_plus',
                                 context: {
                                     groupId: groupID,
                                     groupName,
                                 },
-                                url: window.location.href,
+                                // SL-1487：網址不帶 query 與 hash
+                                url: `${window.location.origin}${window.location.pathname}`,
                                 env: 'prod',
                                 featureCode: 'fetch_comments',
                                 action: 'fetch_comments',
