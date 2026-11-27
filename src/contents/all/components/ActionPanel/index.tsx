@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Typography, Button } from 'antd';
-import { sendMessage } from 'webext-bridge';
 import {
     getPostOwner,
     getCreationTime,
-    getFBCommitLength,
     getPostNumInfo,
     getGroupID,
     getGroupNameClass,
@@ -33,7 +31,7 @@ const ActionPanel = () => {
                         name: groupName,
                     },
                     author: postOwner,
-                    createTime: new Date((creationTime as number) * 1000),
+                    createTime: new Date((creationTime as unknown as number) * 1000),
 
                     commentsLength: commentList?.length || 0,
                     post: postNumInfo,
@@ -71,37 +69,7 @@ const ActionPanel = () => {
                 // sendMessage('hello-from-content-script', JSON.stringify(data), 'background');
             })
             .catch((e) => {
-                const groupID = getGroupID();
-                const groupName = getGroupNameClass();
-                new Promise(() => {
-                    return fetch(
-                        'https://live-shopping.sfec-ipo.com/api/error-logs',
-                        {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                type: "FRONTEND_ERROR",
-                                errorCode: e instanceof Error ? e.name : 'UnknownError',
-                                message: e instanceof Error ? e.message : 'Unknown error',
-                                severity: 'HIGH',
-                                stackTrace: e instanceof Error ? e.stack : 'No stack trace',
-                                serviceCode: 'group_plus',
-                                context: {
-                                    groupId: groupID,
-                                    groupName,
-                                },
-                                url: window.location.href,
-                                env: 'prod',
-                                featureCode: 'fetch_comments',
-                                action: 'fetch_comments',
-                            }),
-                        },
-                    );
-                }).then((res) => {
-                    console.log('log response:', res);
-                });
+                // SL-1483：不再呼叫 /api/error-logs（已被 WAF 全擋，路由將由 SL-1328 移除）
                 console.log('error:', e);
             })
             .finally(() => {

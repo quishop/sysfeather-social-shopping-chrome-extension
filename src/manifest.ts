@@ -9,23 +9,21 @@ const manifest: Manifest.WebExtensionManifest = {
     description: pkg.description,
     manifest_version: 3,
     minimum_chrome_version: pkg.browserslist.split(' ')[2],
-    permissions: ['tabs', 'activeTab', 'declarativeContent', 'storage', 'scripting', 'webRequest'],
+    // SL-1486：程式只用到 chrome.storage；chrome.tabs.create、chrome.runtime 不需要另外申請權限
+    permissions: ['storage'],
     host_permissions: ['https://www.facebook.com/*'],
     content_security_policy: {
-        extension_pages: "script-src 'self' http://localhost; object-src 'self';",
+        // SL-1487：http://localhost 只給本機開發的熱更新用，正式版不允許
+        extension_pages: __DEV__
+            ? "script-src 'self' http://localhost; object-src 'self';"
+            : "script-src 'self'; object-src 'self';",
     },
+    // SL-1487：只開放給 FB（content script 在 FB 頁面插入 icons/* 圖示），其他網站無法偵測使用者有沒有裝插件。
+    // 原本的 js/content.js、js/options.js 兩項沒有對應檔案或用不到，一併移除。
     web_accessible_resources: [
         {
-            matches: ['<all_urls>'],
+            matches: ['https://*.facebook.com/*'],
             resources: ['icons/*', 'images/*', 'fonts/*'],
-        },
-        {
-            resources: ['js/content.js'],
-            matches: ['https://www.facebook.com/*'],
-        },
-        {
-            resources: ['js/options.js'],
-            matches: ['chrome://newtab/*'],
         },
     ],
     background: {
@@ -45,8 +43,7 @@ const manifest: Manifest.WebExtensionManifest = {
                 'https://*.facebook.com/groups/*',
             ],
             css: ['css/all.css'],
-            js: ['js/all.js', ...(__DEV__ ? [] : ['js/all.js'])],
-            all_frames: true,
+            js: ['js/all.js'],
             run_at: 'document_end',
             //    "run_at": "document_start"
         },
@@ -71,11 +68,4 @@ const manifest: Manifest.WebExtensionManifest = {
         '128': 'icons/extension-icon-x128.png',
     },
 };
-if (!__DEV__) {
-    manifest.content_scripts?.unshift({
-        matches: ['<all_urls>'],
-        js: ['js/vendor.js'],
-    });
-}
-
 export default manifest;
