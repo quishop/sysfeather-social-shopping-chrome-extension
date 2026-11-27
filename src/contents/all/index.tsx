@@ -444,12 +444,12 @@ export function extractUserStringByBottomUser(scriptString) {
 export async function fetchComments() {
     const targetElementLength = getTargetPostClassFromDocumentBody().length;
     const targetElement = getTargetPostClassFromDocumentBody()[targetElementLength - 1];
-
+    
     let node;
     if (targetElement)
         for (const pagePostCommitClass of classTable.pagePostCommitDiv) {
             const pagePostCommitDiv = targetElement.querySelector(pagePostCommitClass);
-
+            
             if (pagePostCommitDiv) {
                 node = pagePostCommitDiv;
                 break;
@@ -469,7 +469,7 @@ export async function fetchCommentsList(node) {
     }
 
     var unorderedList = node.querySelector('ul:not([class])');
-
+    
     let check_style = true;
     if (unorderedList) {
     } else {
@@ -479,7 +479,7 @@ export async function fetchCommentsList(node) {
                 break;
             }
         }
-    }
+    }    
     let oneComments = [];
     const res: any[] = [];
     for (const OneCommentDiv of classTable.OneCommentDiv) {
@@ -495,7 +495,7 @@ export async function fetchCommentsList(node) {
             curCommentsList.push(item);
         });
 
-        let res = [];
+        let res = [];    
         // curCommentsList = curCommentsList.filter((item) => {
         //     return (
         //         item.classList.contains('x169t7cy') &&
@@ -591,10 +591,10 @@ export async function check(node, resolve) {
     let clickMoreStatus = clickMoreCommit(node);
 
     // if (checkMoreStatus && checkMoreStatus == clickMoreStatus) {
-    if ((checkMoreStatus && checkMoreStatus !== clickMoreStatus) || scrollMoreStatus) {
+    if (clickMoreStatus || scrollMoreStatus) {
         //找留言列表準備抓留言內容
         //if (is_load) return;
-        await wait(2000);
+        await wait(3000);
         return check(node, resolve);
         // fetchCommentsList(node);
     }
@@ -732,7 +732,7 @@ export function clickMoreCommit(nodes) {
         if (moreCommitArr.length > 0) break;
     }
     for (let i = 0; i < moreCommitArr.length; i++) {
-        const element = moreCommitArr[i];
+        const element = moreCommitArr[i];        
         if (element.hasChildNodes() && element.textContent.indexOf('隱藏') == -1) {
             count++;
             element.click();
@@ -870,7 +870,13 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
     let tmpPostTime = null;
     for (let i = 0; i < classTable.postTimeID.length; i++) {
         const element = classTable.postTimeID[i];
-        tmpPostTime = commentNode.querySelector(element);
+        const isUserLink = commentNode.querySelector(element)?.getAttribute('href') && commentNode.querySelector(element).getAttribute('href').includes('user')
+        if (isUserLink) {
+            tmpPostTime = commentNode.querySelectorAll(element)[1]
+        }
+        if (!isUserLink) {
+            tmpPostTime = isUserLink ? commentNode.querySelectorAll(element)[1] : commentNode.querySelector(element);
+        }
         if (tmpPostTime) break;
     }
 
@@ -881,7 +887,6 @@ export function getCommentUrlFromCommentTimeByCommentNode(commentNode) {
     } else {
         commentUrl = '';
     }
-
     return { commentUrl, commentTime };
 }
 
